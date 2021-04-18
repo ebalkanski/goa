@@ -7,7 +7,7 @@
 
 package openapi
 
-// Service is the openapi service interface.
+// The swagger service serves the API swagger definition.
 type Service interface {
 }
 

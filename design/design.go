@@ -41,8 +41,13 @@ var _ = Service("calc", func() {
 })
 
 var _ = Service("openapi", func() {
-	// Serve the file with relative path ../../gen/http/openapi.json for
-	// requests sent to /swagger.json.
-	Files("/openapi.json", "./gen/http/openapi.json")
-	Files("/openapi3.json", "./gen/http/openapi3.json")
+	Description("The swagger service serves the API swagger definition.")
+	Meta("swagger:generate", "false")
+	HTTP(func() {
+		Path("/openapi")
+	})
+	Files("/openapi.json", "gen/http/openapi3.json", func() {
+		Description("JSON document containing the API swagger definition")
+	})
+	Files("/{*filepath}", "swagger/")
 })

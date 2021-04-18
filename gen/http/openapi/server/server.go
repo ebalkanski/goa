@@ -10,6 +10,8 @@ package server
 import (
 	"context"
 	"net/http"
+	"path"
+	"strings"
 
 	openapi "github.com/ebalkanski/goa/gen/openapi"
 	goahttp "goa.design/goa/v3/http"
@@ -53,8 +55,8 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"./gen/http/openapi.json", "GET", "/openapi.json"},
-			{"./gen/http/openapi3.json", "GET", "/openapi3.json"},
+			{"gen/http/openapi3.json", "GET", "/openapi/openapi.json"},
+			{"swagger/", "GET", "/openapi"},
 		},
 	}
 }
@@ -68,22 +70,27 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 
 // Mount configures the mux to serve the openapi endpoints.
 func Mount(mux goahttp.Muxer) {
-	MountGenHTTPOpenapiJSON(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./gen/http/openapi.json")
-	}))
 	MountGenHTTPOpenapi3JSON(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./gen/http/openapi3.json")
+		http.ServeFile(w, r, "gen/http/openapi3.json")
 	}))
-}
-
-// MountGenHTTPOpenapiJSON configures the mux to serve GET request made to
-// "/openapi.json".
-func MountGenHTTPOpenapiJSON(mux goahttp.Muxer, h http.Handler) {
-	mux.Handle("GET", "/openapi.json", h.ServeHTTP)
+	MountSwagger(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		upath := path.Clean(r.URL.Path)
+		rpath := upath
+		if strings.HasPrefix(upath, "/openapi") {
+			rpath = upath[8:]
+		}
+		http.ServeFile(w, r, path.Join("swagger/", rpath))
+	}))
 }
 
 // MountGenHTTPOpenapi3JSON configures the mux to serve GET request made to
-// "/openapi3.json".
+// "/openapi/openapi.json".
 func MountGenHTTPOpenapi3JSON(mux goahttp.Muxer, h http.Handler) {
-	mux.Handle("GET", "/openapi3.json", h.ServeHTTP)
+	mux.Handle("GET", "/openapi/openapi.json", h.ServeHTTP)
+}
+
+// MountSwagger configures the mux to serve GET request made to "/openapi".
+func MountSwagger(mux goahttp.Muxer, h http.Handler) {
+	mux.Handle("GET", "/openapi/", h.ServeHTTP)
+	mux.Handle("GET", "/openapi/*filepath", h.ServeHTTP)
 }
