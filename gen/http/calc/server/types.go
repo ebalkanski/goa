@@ -19,3 +19,19 @@ func NewAddPayload(a int, b int) *calc.AddPayload {
 
 	return v
 }
+
+// NewRatePayload builds a calc service rate endpoint payload.
+func NewRatePayload(body map[string]float64, id int) *calc.RatePayload {
+	v := make(map[string]float64, len(body))
+	for key, val := range body {
+		tk := key
+		tv := val
+		v[tk] = tv
+	}
+	res := &calc.RatePayload{
+		Rates: v,
+	}
+	res.ID = &id
+
+	return res
+}

@@ -8,6 +8,7 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -40,4 +41,38 @@ func BuildAddPayload(calcAddA string, calcAddB string) (*calc.AddPayload, error)
 	v.B = b
 
 	return v, nil
+}
+
+// BuildRatePayload builds the payload for the calc rate endpoint from CLI
+// flags.
+func BuildRatePayload(calcRateBody string, calcRateID string) (*calc.RatePayload, error) {
+	var err error
+	var body map[string]float64
+	{
+		err = json.Unmarshal([]byte(calcRateBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"Eum ad aliquam quibusdam.\": 0.896909608914096,\n      \"Labore eaque consectetur.\": 0.7825375932190489,\n      \"Omnis veritatis id iure repellat.\": 0.572528816078871\n   }'")
+		}
+	}
+	var id int
+	{
+		var v int64
+		v, err = strconv.ParseInt(calcRateID, 10, 64)
+		id = int(v)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for id, must be INT")
+		}
+	}
+	v := make(map[string]float64, len(body))
+	for key, val := range body {
+		tk := key
+		tv := val
+		v[tk] = tv
+	}
+	res := &calc.RatePayload{
+		Rates: v,
+	}
+	res.ID = &id
+
+	return res, nil
 }

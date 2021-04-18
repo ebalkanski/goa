@@ -20,6 +20,9 @@ type Client struct {
 	// Add Doer is the HTTP client used to make requests to the add endpoint.
 	AddDoer goahttp.Doer
 
+	// Rate Doer is the HTTP client used to make requests to the rate endpoint.
+	RateDoer goahttp.Doer
+
 	// RestoreResponseBody controls whether the response bodies are reset after
 	// decoding so they can be read again.
 	RestoreResponseBody bool
@@ -41,6 +44,7 @@ func NewClient(
 ) *Client {
 	return &Client{
 		AddDoer:             doer,
+		RateDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
@@ -63,6 +67,30 @@ func (c *Client) Add() goa.Endpoint {
 		resp, err := c.AddDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("calc", "add", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Rate returns an endpoint that makes HTTP requests to the calc service rate
+// server.
+func (c *Client) Rate() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeRateRequest(c.encoder)
+		decodeResponse = DecodeRateResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildRateRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.RateDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("calc", "rate", err)
 		}
 		return decodeResponse(resp)
 	}

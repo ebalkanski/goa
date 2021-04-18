@@ -15,3 +15,8 @@ import (
 func AddCalcPath(a int, b int) string {
 	return fmt.Sprintf("/add/%v/%v", a, b)
 }
+
+// RateCalcPath returns the URL path to the calc service rate HTTP endpoint.
+func RateCalcPath(id int) string {
+	return fmt.Sprintf("/rate/%v", id)
+}

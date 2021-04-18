@@ -79,3 +79,73 @@ func DecodeAddResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 		}
 	}
 }
+
+// BuildRateRequest instantiates a HTTP request object with method and path set
+// to call the "calc" service "rate" endpoint
+func (c *Client) BuildRateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	var (
+		id int
+	)
+	{
+		p, ok := v.(*calc.RatePayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("calc", "rate", "*calc.RatePayload", v)
+		}
+		if p.ID != nil {
+			id = *p.ID
+		}
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: RateCalcPath(id)}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("calc", "rate", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeRateRequest returns an encoder for requests sent to the calc rate
+// server.
+func EncodeRateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*calc.RatePayload)
+		if !ok {
+			return goahttp.ErrInvalidType("calc", "rate", "*calc.RatePayload", v)
+		}
+		body := p.Rates
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("calc", "rate", err)
+		}
+		return nil
+	}
+}
+
+// DecodeRateResponse returns a decoder for responses returned by the calc rate
+// endpoint. restoreBody controls whether the response body should be restored
+// after having been read.
+func DecodeRateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("calc", "rate", resp.StatusCode, string(body))
+		}
+	}
+}

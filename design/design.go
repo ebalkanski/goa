@@ -38,6 +38,17 @@ var _ = Service("calc", func() {
 			Response(StatusOK)
 		})
 	})
+
+	Method("rate", func() {
+		Payload(func() {
+			Attribute("id", Int)
+			Attribute("rates", MapOf(String, Float64))
+		})
+		HTTP(func() {
+			POST("/rate/{id}")
+			Body("rates")
+		})
+	})
 })
 
 var _ = Service("openapi", func() {

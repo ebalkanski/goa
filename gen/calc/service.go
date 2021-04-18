@@ -15,6 +15,8 @@ import (
 type Service interface {
 	// Add implements add.
 	Add(context.Context, *AddPayload) (res int, err error)
+	// Rate implements rate.
+	Rate(context.Context, *RatePayload) (err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -25,7 +27,7 @@ const ServiceName = "calc"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"add"}
+var MethodNames = [2]string{"add", "rate"}
 
 // AddPayload is the payload type of the calc service add method.
 type AddPayload struct {
@@ -33,4 +35,10 @@ type AddPayload struct {
 	A int
 	// Right operand
 	B int
+}
+
+// RatePayload is the payload type of the calc service rate method.
+type RatePayload struct {
+	ID    *int
+	Rates map[string]float64
 }

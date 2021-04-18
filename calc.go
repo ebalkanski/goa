@@ -23,3 +23,10 @@ func (s *calcsrvc) Add(ctx context.Context, p *calc.AddPayload) (res int, err er
 	s.logger.Print("calc.add")
 	return p.A + p.B, nil
 }
+
+func (s *calcsrvc) Rate(ctx context.Context, payload *calc.RatePayload) (err error) {
+	s.logger.Printf("%#v\n", payload)
+	s.logger.Printf("%#v\n", *payload.ID)
+	s.logger.Printf("%#v\n", payload.Rates)
+	return nil
+}

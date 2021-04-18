@@ -38,3 +38,25 @@ paths:
             format: int64
       schemes:
       - http
+  /rate/{id}:
+    post:
+      tags:
+      - calc
+      summary: rate calc
+      operationId: calc#rate
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: integer
+      - name: map
+        in: body
+        required: true
+        schema:
+          type: object
+          additionalProperties: true
+      responses:
+        "204":
+          description: No Content response.
+      schemes:
+      - http

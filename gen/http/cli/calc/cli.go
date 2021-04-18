@@ -23,13 +23,13 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `calc add
+	return `calc (add|rate)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` calc add --a 5952269320165453119 --b 1828520165265779840` + "\n" +
+	return os.Args[0] + ` calc add --a 1228682945796019344 --b 4886963557863946648` + "\n" +
 		""
 }
 
@@ -48,9 +48,14 @@ func ParseEndpoint(
 		calcAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
 		calcAddAFlag = calcAddFlags.String("a", "REQUIRED", "Left operand")
 		calcAddBFlag = calcAddFlags.String("b", "REQUIRED", "Right operand")
+
+		calcRateFlags    = flag.NewFlagSet("rate", flag.ExitOnError)
+		calcRateBodyFlag = calcRateFlags.String("body", "REQUIRED", "")
+		calcRateIDFlag   = calcRateFlags.String("id", "REQUIRED", "")
 	)
 	calcFlags.Usage = calcUsage
 	calcAddFlags.Usage = calcAddUsage
+	calcRateFlags.Usage = calcRateUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -89,6 +94,9 @@ func ParseEndpoint(
 			case "add":
 				epf = calcAddFlags
 
+			case "rate":
+				epf = calcRateFlags
+
 			}
 
 		}
@@ -117,6 +125,9 @@ func ParseEndpoint(
 			case "add":
 				endpoint = c.Add()
 				data, err = calcc.BuildAddPayload(*calcAddAFlag, *calcAddBFlag)
+			case "rate":
+				endpoint = c.Rate()
+				data, err = calcc.BuildRatePayload(*calcRateBodyFlag, *calcRateIDFlag)
 			}
 		}
 	}
@@ -135,6 +146,7 @@ Usage:
 
 COMMAND:
     add: Add implements add.
+    rate: Rate implements rate.
 
 Additional help:
     %s calc COMMAND --help
@@ -148,6 +160,22 @@ Add implements add.
     -b INT: Right operand
 
 Example:
-    `+os.Args[0]+` calc add --a 5952269320165453119 --b 1828520165265779840
+    `+os.Args[0]+` calc add --a 1228682945796019344 --b 4886963557863946648
+`, os.Args[0])
+}
+
+func calcRateUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] calc rate -body JSON -id INT
+
+Rate implements rate.
+    -body JSON: 
+    -id INT: 
+
+Example:
+    `+os.Args[0]+` calc rate --body '{
+      "Eum ad aliquam quibusdam.": 0.896909608914096,
+      "Labore eaque consectetur.": 0.7825375932190489,
+      "Omnis veritatis id iure repellat.": 0.572528816078871
+   }' --id 5058434971892362792
 `, os.Args[0])
 }
