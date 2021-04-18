@@ -29,7 +29,7 @@ func UsageCommands() string {
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` calc add --a 1228682945796019344 --b 4886963557863946648` + "\n" +
+	return os.Args[0] + ` calc add --a 1 --b 2` + "\n" +
 		""
 }
 
@@ -160,7 +160,7 @@ Add implements add.
     -b INT: Right operand
 
 Example:
-    `+os.Args[0]+` calc add --a 1228682945796019344 --b 4886963557863946648
+    `+os.Args[0]+` calc add --a 1 --b 2
 `, os.Args[0])
 }
 
@@ -173,9 +173,8 @@ Rate implements rate.
 
 Example:
     `+os.Args[0]+` calc rate --body '{
-      "Eum ad aliquam quibusdam.": 0.896909608914096,
-      "Labore eaque consectetur.": 0.7825375932190489,
-      "Omnis veritatis id iure repellat.": 0.572528816078871
-   }' --id 5058434971892362792
+      "a": 1.1,
+      "b": 2.2
+   }' --id 1
 `, os.Args[0])
 }

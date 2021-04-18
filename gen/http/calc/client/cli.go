@@ -51,7 +51,7 @@ func BuildRatePayload(calcRateBody string, calcRateID string) (*calc.RatePayload
 	{
 		err = json.Unmarshal([]byte(calcRateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"Eum ad aliquam quibusdam.\": 0.896909608914096,\n      \"Labore eaque consectetur.\": 0.7825375932190489,\n      \"Omnis veritatis id iure repellat.\": 0.572528816078871\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"a\": 1.1,\n      \"b\": 2.2\n   }'")
 		}
 	}
 	var id int

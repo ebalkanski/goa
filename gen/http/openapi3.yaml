@@ -20,9 +20,9 @@ paths:
         schema:
           type: integer
           description: Left operand
-          example: 4237079762777733099
+          example: 1
           format: int64
-        example: 6617244346292896542
+        example: 1
       - name: b
         in: path
         description: Right operand
@@ -30,9 +30,9 @@ paths:
         schema:
           type: integer
           description: Right operand
-          example: 2574101197078288820
+          example: 2
           format: int64
-        example: 9032300625042805317
+        example: 2
       responses:
         "200":
           description: OK response.
@@ -40,9 +40,9 @@ paths:
             application/json:
               schema:
                 type: integer
-                example: 1077756009717331571
+                example: 3
                 format: int64
-              example: 5960237758972813303
+              example: 3
   /rate/{id}:
     post:
       tags:
@@ -55,9 +55,9 @@ paths:
         required: true
         schema:
           type: integer
-          example: 6050689554004673745
+          example: 1
           format: int64
-        example: 2471232497091895035
+        example: 1
       requestBody:
         required: true
         content:
@@ -65,14 +65,12 @@ paths:
             schema:
               type: object
               example:
-                Facere aperiam.: 0.17549653263694814
-                Ipsam eveniet.: 0.14038918274267487
-                Odit non.: 0.7608021603257851
+                a: 1.1
+                b: 2.2
               additionalProperties: true
             example:
-              Consequatur quis dolorum.: 0.24358024080941001
-              Mollitia et quis consectetur.: 0.9745947852106661
-              Neque consequatur maiores aut.: 0.007162581901639558
+              a: 1.1
+              b: 2.2
       responses:
         "204":
           description: No Content response.

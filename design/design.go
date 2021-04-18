@@ -20,14 +20,20 @@ var _ = Service("calc", func() {
 		// Here the payload is an object that consists of two fields
 		Payload(func() {
 			// Attribute describes an object field
-			Attribute("a", Int, "Left operand")
-			Attribute("b", Int, "Right operand")
+			Attribute("a", Int, "Left operand", func() {
+				Example(1)
+			})
+			Attribute("b", Int, "Right operand", func() {
+				Example(2)
+			})
 			// Both attributes must be provided when invoking "add"
 			Required("a", "b")
 		})
 		// Result describes the method result
 		// Here the result is a simple integer value
-		Result(Int)
+		Result(Int, func() {
+			Example(3)
+		})
 		// HTTP describes the HTTP transport mapping
 		HTTP(func() {
 			// Requests to the service consist of HTTP GET requests
@@ -41,8 +47,12 @@ var _ = Service("calc", func() {
 
 	Method("rate", func() {
 		Payload(func() {
-			Attribute("id", Int)
-			Attribute("rates", MapOf(String, Float64))
+			Attribute("id", Int, func() {
+				Example(1)
+			})
+			Attribute("rates", MapOf(String, Float64), func() {
+				Example(map[string]float64{"a": 1.1, "b": 2.2})
+			})
 		})
 		HTTP(func() {
 			POST("/rate/{id}")
