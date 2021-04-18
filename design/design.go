@@ -46,7 +46,7 @@ var _ = Service("openapi", func() {
 	HTTP(func() {
 		Path("/openapi")
 	})
-	Files("/openapi.json", "gen/http/openapi3.json", func() {
+	Files("/openapi.json", "./gen/http/openapi3.json", func() {
 		Description("JSON document containing the API swagger definition")
 	})
 	Files("/{*filepath}", "swagger/")
