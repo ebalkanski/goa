@@ -30,9 +30,9 @@ paths:
         schema:
           type: integer
           description: Right operand
-          example: 2
+          example: 0
           format: int64
-        example: 2
+        example: 0
       responses:
         "200":
           description: OK response.
@@ -43,6 +43,16 @@ paths:
                 example: 3
                 format: int64
               example: 3
+        "400":
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DivByZero'
+              example:
+                errors:
+                - Err1
+                - Err2
   /rate/{id}:
     post:
       tags:
@@ -74,4 +84,25 @@ paths:
       responses:
         "204":
           description: No Content response.
-components: {}
+components:
+  schemas:
+    DivByZero:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+            example: Est ut.
+          description: division by zero leads to infinity.
+          example:
+          - Err1
+          - Err2
+      description: DivByZero is the error returned by the service methods when the
+        right operand is 0.
+      example:
+        errors:
+        - Err1
+        - Err2
+      required:
+      - errors

@@ -36,6 +36,12 @@ paths:
           schema:
             type: integer
             format: int64
+        "400":
+          description: Bad Request response.
+          schema:
+            $ref: '#/definitions/CalcAddDivByZeroResponseBody'
+            required:
+            - errors
       schemes:
       - http
   /rate/{id}:
@@ -60,3 +66,25 @@ paths:
           description: No Content response.
       schemes:
       - http
+definitions:
+  CalcAddDivByZeroResponseBody:
+    title: CalcAddDivByZeroResponseBody
+    type: object
+    properties:
+      errors:
+        type: array
+        items:
+          type: string
+          example: Magnam asperiores dolorum.
+        description: division by zero leads to infinity.
+        example:
+        - Err1
+        - Err2
+    description: DivByZero is the error returned by the service methods when the right
+      operand is 0.
+    example:
+      errors:
+      - Err1
+      - Err2
+    required:
+    - errors

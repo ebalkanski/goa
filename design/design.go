@@ -1,6 +1,8 @@
 package design
 
-import . "goa.design/goa/v3/dsl"
+import (
+	. "goa.design/goa/v3/dsl"
+)
 
 // API describes the global properties of the API server.
 var _ = API("calc", func() {
@@ -11,9 +13,25 @@ var _ = API("calc", func() {
 	})
 })
 
+var DivByZero = Type("DivByZero", func() {
+	Description("DivByZero is the error returned when using value 0 as divisor.")
+	Field(1, "errors", ArrayOf(String), "division by zero leads to infinity.", func() {
+		Example([]string{
+			"Err1",
+			"Err2",
+		})
+	})
+	Required("errors")
+})
+
 // Service describes a service
 var _ = Service("calc", func() {
 	Description("The calc service performs operations on numbers")
+
+	Error("div_by_zero", DivByZero, func() {
+		Description("DivByZero is the error returned by the service methods when the right operand is 0.")
+	})
+
 	// Method describes a service method (endpoint)
 	Method("add", func() {
 		// Payload describes the method payload
@@ -24,7 +42,7 @@ var _ = Service("calc", func() {
 				Example(1)
 			})
 			Attribute("b", Int, "Right operand", func() {
-				Example(2)
+				Example(0)
 			})
 			// Both attributes must be provided when invoking "add"
 			Required("a", "b")
@@ -34,6 +52,7 @@ var _ = Service("calc", func() {
 		Result(Int, func() {
 			Example(3)
 		})
+
 		// HTTP describes the HTTP transport mapping
 		HTTP(func() {
 			// Requests to the service consist of HTTP GET requests
@@ -42,6 +61,7 @@ var _ = Service("calc", func() {
 			// Responses use a "200 OK" HTTP status
 			// The result is encoded in the response body
 			Response(StatusOK)
+			Response("div_by_zero", StatusBadRequest)
 		})
 	})
 

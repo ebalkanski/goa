@@ -21,6 +21,16 @@ func NewCalc(logger *log.Logger) calc.Service {
 // Add implements add.
 func (s *calcsrvc) Add(ctx context.Context, p *calc.AddPayload) (res int, err error) {
 	s.logger.Print("calc.add")
+
+	if p.B == 0 {
+		return 0, &calc.DivByZero{
+			Errors: []string{
+				"div by zero",
+				"another error",
+			},
+		}
+	}
+
 	return p.A + p.B, nil
 }
 

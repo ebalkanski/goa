@@ -11,6 +11,26 @@ import (
 	calc "github.com/ebalkanski/goa/gen/calc"
 )
 
+// AddDivByZeroResponseBody is the type of the "calc" service "add" endpoint
+// HTTP response body for the "div_by_zero" error.
+type AddDivByZeroResponseBody struct {
+	// division by zero leads to infinity.
+	Errors []string `form:"errors" json:"errors" xml:"errors"`
+}
+
+// NewAddDivByZeroResponseBody builds the HTTP response body from the result of
+// the "add" endpoint of the "calc" service.
+func NewAddDivByZeroResponseBody(res *calc.DivByZero) *AddDivByZeroResponseBody {
+	body := &AddDivByZeroResponseBody{}
+	if res.Errors != nil {
+		body.Errors = make([]string, len(res.Errors))
+		for i, val := range res.Errors {
+			body.Errors[i] = val
+		}
+	}
+	return body
+}
+
 // NewAddPayload builds a calc service add endpoint payload.
 func NewAddPayload(a int, b int) *calc.AddPayload {
 	v := &calc.AddPayload{}

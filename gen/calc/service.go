@@ -42,3 +42,19 @@ type RatePayload struct {
 	ID    *int
 	Rates map[string]float64
 }
+
+// DivByZero is the error returned when using value 0 as divisor.
+type DivByZero struct {
+	// division by zero leads to infinity.
+	Errors []string
+}
+
+// Error returns an error description.
+func (e *DivByZero) Error() string {
+	return "DivByZero is the error returned when using value 0 as divisor."
+}
+
+// ErrorName returns "DivByZero".
+func (e *DivByZero) ErrorName() string {
+	return "div_by_zero"
+}
