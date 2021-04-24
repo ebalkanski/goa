@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"os"
 
-	calcc "github.com/ebalkanski/goa/gen/http/calc/client"
+	playc "github.com/ebalkanski/goa/gen/http/play/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -23,13 +23,13 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `calc (add|rate)
+	return `play (add|rate)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` calc add --a 1 --b 0` + "\n" +
+	return os.Args[0] + ` play add --a 1 --b 2` + "\n" +
 		""
 }
 
@@ -43,19 +43,19 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
-		calcFlags = flag.NewFlagSet("calc", flag.ContinueOnError)
+		playFlags = flag.NewFlagSet("play", flag.ContinueOnError)
 
-		calcAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
-		calcAddAFlag = calcAddFlags.String("a", "REQUIRED", "Left operand")
-		calcAddBFlag = calcAddFlags.String("b", "REQUIRED", "Right operand")
+		playAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
+		playAddAFlag = playAddFlags.String("a", "REQUIRED", "Left operand")
+		playAddBFlag = playAddFlags.String("b", "REQUIRED", "Right operand")
 
-		calcRateFlags    = flag.NewFlagSet("rate", flag.ExitOnError)
-		calcRateBodyFlag = calcRateFlags.String("body", "REQUIRED", "")
-		calcRateIDFlag   = calcRateFlags.String("id", "REQUIRED", "")
+		playRateFlags    = flag.NewFlagSet("rate", flag.ExitOnError)
+		playRateBodyFlag = playRateFlags.String("body", "REQUIRED", "")
+		playRateIDFlag   = playRateFlags.String("id", "REQUIRED", "")
 	)
-	calcFlags.Usage = calcUsage
-	calcAddFlags.Usage = calcAddUsage
-	calcRateFlags.Usage = calcRateUsage
+	playFlags.Usage = playUsage
+	playAddFlags.Usage = playAddUsage
+	playRateFlags.Usage = playRateUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -72,8 +72,8 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
-		case "calc":
-			svcf = calcFlags
+		case "play":
+			svcf = playFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -89,13 +89,13 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
-		case "calc":
+		case "play":
 			switch epn {
 			case "add":
-				epf = calcAddFlags
+				epf = playAddFlags
 
 			case "rate":
-				epf = calcRateFlags
+				epf = playRateFlags
 
 			}
 
@@ -119,15 +119,15 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "calc":
-			c := calcc.NewClient(scheme, host, doer, enc, dec, restore)
+		case "play":
+			c := playc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
 			case "add":
 				endpoint = c.Add()
-				data, err = calcc.BuildAddPayload(*calcAddAFlag, *calcAddBFlag)
+				data, err = playc.BuildAddPayload(*playAddAFlag, *playAddBFlag)
 			case "rate":
 				endpoint = c.Rate()
-				data, err = calcc.BuildRatePayload(*calcRateBodyFlag, *calcRateIDFlag)
+				data, err = playc.BuildRatePayload(*playRateBodyFlag, *playRateIDFlag)
 			}
 		}
 	}
@@ -138,41 +138,41 @@ func ParseEndpoint(
 	return endpoint, data, nil
 }
 
-// calcUsage displays the usage of the calc command and its subcommands.
-func calcUsage() {
-	fmt.Fprintf(os.Stderr, `The calc service performs operations on numbers
+// playUsage displays the usage of the play command and its subcommands.
+func playUsage() {
+	fmt.Fprintf(os.Stderr, `The play service is a sandbox for goa testing
 Usage:
-    %s [globalflags] calc COMMAND [flags]
+    %s [globalflags] play COMMAND [flags]
 
 COMMAND:
     add: Add implements add.
     rate: Rate implements rate.
 
 Additional help:
-    %s calc COMMAND --help
+    %s play COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func calcAddUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] calc add -a INT -b INT
+func playAddUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] play add -a INT -b INT
 
 Add implements add.
     -a INT: Left operand
     -b INT: Right operand
 
 Example:
-    `+os.Args[0]+` calc add --a 1 --b 0
+    `+os.Args[0]+` play add --a 1 --b 2
 `, os.Args[0])
 }
 
-func calcRateUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] calc rate -body JSON -id INT
+func playRateUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] play rate -body JSON -id INT
 
 Rate implements rate.
     -body JSON: 
     -id INT: 
 
 Example:
-    `+os.Args[0]+` calc rate --body '{
+    `+os.Args[0]+` play rate --body '{
       "a": 1.1,
       "b": 2.2
    }' --id 1

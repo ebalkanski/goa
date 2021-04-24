@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: Calculator Service
-  description: HTTP service for adding numbers, a goa teaser
+  title: Play with goa
+  description: HTTP service for playing with goa
   version: "1.0"
 servers:
 - url: http://localhost:8080
@@ -9,9 +9,9 @@ paths:
   /add/{a}/{b}:
     get:
       tags:
-      - calc
-      summary: add calc
-      operationId: calc#add
+      - play
+      summary: add play
+      operationId: play#add
       parameters:
       - name: a
         in: path
@@ -30,9 +30,9 @@ paths:
         schema:
           type: integer
           description: Right operand
-          example: 0
+          example: 2
           format: int64
-        example: 0
+        example: 2
       responses:
         "200":
           description: OK response.
@@ -43,22 +43,12 @@ paths:
                 example: 3
                 format: int64
               example: 3
-        "400":
-          description: Bad Request response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DivByZero'
-              example:
-                errors:
-                - Err1
-                - Err2
   /rate/{id}:
     post:
       tags:
-      - calc
-      summary: rate calc
-      operationId: calc#rate
+      - play
+      summary: rate play
+      operationId: play#rate
       parameters:
       - name: id
         in: path
@@ -84,25 +74,4 @@ paths:
       responses:
         "204":
           description: No Content response.
-components:
-  schemas:
-    DivByZero:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            type: string
-            example: Est ut.
-          description: division by zero leads to infinity.
-          example:
-          - Err1
-          - Err2
-      description: DivByZero is the error returned by the service methods when the
-        right operand is 0.
-      example:
-        errors:
-        - Err1
-        - Err2
-      required:
-      - errors
+components: {}

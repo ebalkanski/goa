@@ -2,55 +2,41 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
-	"net"
-	"net/url"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
-	"github.com/ebalkanski/goa/gen/calc"
+	"github.com/ebalkanski/goa/gen/play"
 	"github.com/ebalkanski/goa/internal/service"
 )
 
 func main() {
-	// Define command line flags, add any other flag required to configure the
-	// service.
-	var (
-		hostF     = flag.String("host", "localhost", "Server host (valid values: localhost)")
-		domainF   = flag.String("domain", "", "Host domain name (overrides host domain specified in service design)")
-		httpPortF = flag.String("http-port", "", "HTTP port (overrides host HTTP port specified in service design)")
-		secureF   = flag.Bool("secure", false, "Use secure scheme (https or grpcs)")
-		dbgF      = flag.Bool("debug", false, "Log request and response bodies")
-	)
-	flag.Parse()
-
 	// Setup logger. Replace logger with your own log package of choice.
 	var (
 		logger *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[calcapi] ", log.Ltime)
+		logger = log.New(os.Stderr, "[playapi] ", log.Ltime)
 	}
 
 	// Initialize the services.
 	var (
-		calcSvc calc.Service
+		playSvc play.Service
 	)
 	{
-		calcSvc = service.NewCalc(logger)
+		playSvc = service.NewPlay(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
 	// potentially running in different processes.
 	var (
-		calcEndpoints *calc.Endpoints
+		playEndpoints *play.Endpoints
 	)
 	{
-		calcEndpoints = calc.NewEndpoints(calcSvc)
+		playEndpoints = play.NewEndpoints(playSvc)
 	}
 
 	// Create channel used by both the signal handler and server goroutines
@@ -68,38 +54,8 @@ func main() {
 	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// Start the servers and send errors (if any) to the error channel.
-	switch *hostF {
-	case "localhost":
-		{
-			addr := "http://localhost:8080"
-			u, err := url.Parse(addr)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "invalid URL %#v: %s\n", addr, err)
-				os.Exit(1)
-			}
-			if *secureF {
-				u.Scheme = "https"
-			}
-			if *domainF != "" {
-				u.Host = *domainF
-			}
-			if *httpPortF != "" {
-				h, _, err := net.SplitHostPort(u.Host)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "invalid URL %#v: %s\n", u.Host, err)
-					os.Exit(1)
-				}
-				u.Host = net.JoinHostPort(h, *httpPortF)
-			} else if u.Port() == "" {
-				u.Host = net.JoinHostPort(u.Host, ":80")
-			}
-			handleHTTPServer(ctx, u, calcEndpoints, &wg, errc, logger, *dbgF)
-		}
-
-	default:
-		fmt.Fprintf(os.Stderr, "invalid host argument: %q (valid hosts: localhost)\n", *hostF)
-	}
+	// Start server
+	handleHTTPServer(ctx, "localhost:8080", playEndpoints, &wg, errc, logger, false)
 
 	// Wait for signal.
 	logger.Printf("exiting (%v)", <-errc)

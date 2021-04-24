@@ -4,23 +4,21 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"sync"
 	"time"
 
-	goahttp "goa.design/goa/v3/http"
-
-	calc "github.com/ebalkanski/goa/gen/calc"
-	calcsvr "github.com/ebalkanski/goa/gen/http/calc/server"
 	openapisvr "github.com/ebalkanski/goa/gen/http/openapi/server"
+	playsvr "github.com/ebalkanski/goa/gen/http/play/server"
+	"github.com/ebalkanski/goa/gen/play"
+	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
 )
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
-func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
+func handleHTTPServer(ctx context.Context, host string, playEndpoints *play.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
 	var (
@@ -51,20 +49,20 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
-		calcServer *calcsvr.Server
+		playServer *playsvr.Server
 	)
 	{
 		eh := errorHandler(logger)
-		calcServer = calcsvr.New(calcEndpoints, mux, dec, enc, eh, nil)
+		playServer = playsvr.New(playEndpoints, mux, dec, enc, eh, nil)
 		if debug {
 			servers := goahttp.Servers{
-				calcServer,
+				playServer,
 			}
 			servers.Use(httpmdlwr.Debug(mux, os.Stdout))
 		}
 	}
 	// Configure the mux.
-	calcsvr.Mount(mux, calcServer)
+	playsvr.Mount(mux, playServer)
 	openapisvr.Mount(mux)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
@@ -78,7 +76,7 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: ":8080", Handler: handler}
-	for _, m := range calcServer.Mounts {
+	for _, m := range playServer.Mounts {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
 
@@ -88,12 +86,12 @@ func handleHTTPServer(ctx context.Context, u *url.URL, calcEndpoints *calc.Endpo
 
 		// Start HTTP server in a separate goroutine.
 		go func() {
-			logger.Printf("HTTP server listening on %q", u.Host)
+			logger.Printf("HTTP server listening on %q", host)
 			errc <- srv.ListenAndServe()
 		}()
 
 		<-ctx.Done()
-		logger.Printf("shutting down HTTP server at %q", u.Host)
+		logger.Printf("shutting down HTTP server at %q", host)
 
 		// Shutdown gracefully with a 30s timeout.
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)

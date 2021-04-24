@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  title: Calculator Service
-  description: HTTP service for adding numbers, a goa teaser
+  title: Play with goa
+  description: HTTP service for playing with goa
   version: ""
 host: localhost:8080
 consumes:
@@ -16,9 +16,9 @@ paths:
   /add/{a}/{b}:
     get:
       tags:
-      - calc
-      summary: add calc
-      operationId: calc#add
+      - play
+      summary: add play
+      operationId: play#add
       parameters:
       - name: a
         in: path
@@ -36,20 +36,14 @@ paths:
           schema:
             type: integer
             format: int64
-        "400":
-          description: Bad Request response.
-          schema:
-            $ref: '#/definitions/CalcAddDivByZeroResponseBody'
-            required:
-            - errors
       schemes:
       - http
   /rate/{id}:
     post:
       tags:
-      - calc
-      summary: rate calc
-      operationId: calc#rate
+      - play
+      summary: rate play
+      operationId: play#rate
       parameters:
       - name: id
         in: path
@@ -66,25 +60,3 @@ paths:
           description: No Content response.
       schemes:
       - http
-definitions:
-  CalcAddDivByZeroResponseBody:
-    title: CalcAddDivByZeroResponseBody
-    type: object
-    properties:
-      errors:
-        type: array
-        items:
-          type: string
-          example: Magnam asperiores dolorum.
-        description: division by zero leads to infinity.
-        example:
-        - Err1
-        - Err2
-    description: DivByZero is the error returned by the service methods when the right
-      operand is 0.
-    example:
-      errors:
-      - Err1
-      - Err2
-    required:
-    - errors
