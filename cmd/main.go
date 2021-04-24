@@ -12,8 +12,8 @@ import (
 	"sync"
 	"syscall"
 
-	calcapi "github.com/ebalkanski/goa"
-	calc "github.com/ebalkanski/goa/gen/calc"
+	"github.com/ebalkanski/goa/gen/calc"
+	"github.com/ebalkanski/goa/internal/service"
 )
 
 func main() {
@@ -41,7 +41,7 @@ func main() {
 		calcSvc calc.Service
 	)
 	{
-		calcSvc = calcapi.NewCalc(logger)
+		calcSvc = service.NewCalc(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
