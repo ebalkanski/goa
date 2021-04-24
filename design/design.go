@@ -85,10 +85,10 @@ var _ = Service("openapi", func() {
 	Description("The swagger service serves the API swagger definition.")
 	Meta("swagger:generate", "false")
 	HTTP(func() {
-		Path("/openapi")
+		Path("/swagger-ui")
 	})
 	Files("/openapi.json", "./gen/http/openapi3.json", func() {
 		Description("JSON document containing the API swagger definition")
 	})
-	Files("/{*filepath}", "swagger/")
+	Files("/{*filepath}", "./internal/swagger/")
 })

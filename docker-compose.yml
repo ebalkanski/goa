@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  goa:
+    container_name: goa
+    build:
+      context: $GOPATH/src/github.com/ebalkanski/goa
+      dockerfile: Dockerfile.dev
+    volumes:
+      - "$GOPATH/src/github.com/ebalkanski/goa:/go/src/github.com/ebalkanski/goa"
+    ports:
+      - "8080:8080"

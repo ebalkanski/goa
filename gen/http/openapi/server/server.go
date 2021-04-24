@@ -55,8 +55,8 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"./gen/http/openapi3.json", "GET", "/openapi/openapi.json"},
-			{"swagger/", "GET", "/openapi"},
+			{"./gen/http/openapi3.json", "GET", "/swagger-ui/openapi.json"},
+			{"./internal/swagger/", "GET", "/swagger-ui"},
 		},
 	}
 }
@@ -73,24 +73,25 @@ func Mount(mux goahttp.Muxer) {
 	MountGenHTTPOpenapi3JSON(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./gen/http/openapi3.json")
 	}))
-	MountSwagger(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	MountInternalSwagger(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		upath := path.Clean(r.URL.Path)
 		rpath := upath
-		if strings.HasPrefix(upath, "/openapi") {
-			rpath = upath[8:]
+		if strings.HasPrefix(upath, "/swagger-ui") {
+			rpath = upath[11:]
 		}
-		http.ServeFile(w, r, path.Join("swagger/", rpath))
+		http.ServeFile(w, r, path.Join("./internal/swagger/", rpath))
 	}))
 }
 
 // MountGenHTTPOpenapi3JSON configures the mux to serve GET request made to
-// "/openapi/openapi.json".
+// "/swagger-ui/openapi.json".
 func MountGenHTTPOpenapi3JSON(mux goahttp.Muxer, h http.Handler) {
-	mux.Handle("GET", "/openapi/openapi.json", h.ServeHTTP)
+	mux.Handle("GET", "/swagger-ui/openapi.json", h.ServeHTTP)
 }
 
-// MountSwagger configures the mux to serve GET request made to "/openapi".
-func MountSwagger(mux goahttp.Muxer, h http.Handler) {
-	mux.Handle("GET", "/openapi/", h.ServeHTTP)
-	mux.Handle("GET", "/openapi/*filepath", h.ServeHTTP)
+// MountInternalSwagger configures the mux to serve GET request made to
+// "/swagger-ui".
+func MountInternalSwagger(mux goahttp.Muxer, h http.Handler) {
+	mux.Handle("GET", "/swagger-ui/", h.ServeHTTP)
+	mux.Handle("GET", "/swagger-ui/*filepath", h.ServeHTTP)
 }
