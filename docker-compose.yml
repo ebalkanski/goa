@@ -6,6 +6,8 @@ services:
     build:
       context: $GOPATH/src/github.com/ebalkanski/goa
       dockerfile: Dockerfile.dev
+    env_file:
+      - .env
     volumes:
       - "$GOPATH/src/github.com/ebalkanski/goa:/go/src/github.com/ebalkanski/goa"
     ports:

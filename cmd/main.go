@@ -8,12 +8,31 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
+
+	"github.com/kelseyhightower/envconfig"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/ebalkanski/goa/gen/play"
 	"github.com/ebalkanski/goa/internal/service"
 )
 
 func main() {
+	// Load configuration from environment variables
+	var cfg config
+	if err := envconfig.Process("", &cfg); err != nil {
+		log.Fatal("error loading configuration")
+	}
+
+	// Init Mongo client
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	_, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.Mongo.URI))
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Setup logger. Replace logger with your own log package of choice.
 	var (
 		logger *log.Logger
@@ -52,7 +71,7 @@ func main() {
 	}()
 
 	var wg sync.WaitGroup
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel = context.WithCancel(context.Background())
 
 	// Start server
 	handleHTTPServer(ctx, "localhost:8080", playEndpoints, &wg, errc, logger, false)
