@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
-	"github.com/ebalkanski/goa/gen/play"
+	"github.com/ebalkanski/goa/gen/user"
 	"github.com/ebalkanski/goa/internal/service"
 )
 
@@ -47,19 +47,19 @@ func main() {
 
 	// Initialize the services.
 	var (
-		playSvc play.Service
+		userSvc user.Service
 	)
 	{
-		playSvc = service.NewPlay(logger)
+		userSvc = service.NewUser(logger)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
 	// potentially running in different processes.
 	var (
-		playEndpoints *play.Endpoints
+		userEndpoints *user.Endpoints
 	)
 	{
-		playEndpoints = play.NewEndpoints(playSvc)
+		userEndpoints = user.NewEndpoints(userSvc)
 	}
 
 	// Create channel used by both the signal handler and server goroutines
@@ -78,7 +78,7 @@ func main() {
 	ctx, cancel = context.WithCancel(context.Background())
 
 	// Start server
-	handleHTTPServer(ctx, "localhost:8080", playEndpoints, &wg, errc, logger, false)
+	handleHTTPServer(ctx, "localhost:8080", userEndpoints, &wg, errc, logger, false)
 
 	// Wait for signal.
 	logger.Printf("exiting (%v)", <-errc)

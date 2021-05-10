@@ -13,50 +13,80 @@ produces:
 - application/xml
 - application/gob
 paths:
-  /add/{a}/{b}:
+  /user:
+    post:
+      tags:
+      - user
+      summary: create user
+      description: Create new user.
+      operationId: user#create
+      parameters:
+      - name: CreateRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/UserCreateRequestBody'
+          required:
+          - name
+          - age
+      responses:
+        "201":
+          description: User is created successfully.
+      schemes:
+      - http
+  /user/{name}:
     get:
       tags:
-      - play
-      summary: add play
-      operationId: play#add
+      - user
+      summary: get user
+      operationId: user#get
       parameters:
-      - name: a
+      - name: name
         in: path
-        description: Left operand
         required: true
-        type: integer
-      - name: b
-        in: path
-        description: Right operand
-        required: true
-        type: integer
+        type: string
       responses:
         "200":
           description: OK response.
           schema:
-            type: integer
-            format: int64
+            $ref: '#/definitions/UserGetResponseBody'
+            required:
+            - name
+            - age
       schemes:
       - http
-  /rate/{id}:
-    post:
-      tags:
-      - play
-      summary: rate play
-      operationId: play#rate
-      parameters:
-      - name: id
-        in: path
-        required: true
+definitions:
+  UserCreateRequestBody:
+    title: UserCreateRequestBody
+    type: object
+    properties:
+      age:
         type: integer
-      - name: map
-        in: body
-        required: true
-        schema:
-          type: object
-          additionalProperties: true
-      responses:
-        "204":
-          description: No Content response.
-      schemes:
-      - http
+        example: 5501069298807053509
+        format: int64
+      name:
+        type: string
+        example: Sint est consectetur nihil.
+    example:
+      age: 25
+      name: Bob
+    required:
+    - name
+    - age
+  UserGetResponseBody:
+    title: UserGetResponseBody
+    type: object
+    properties:
+      age:
+        type: integer
+        example: 2066121240725874602
+        format: int64
+      name:
+        type: string
+        example: Quia vel provident.
+    example:
+      age: 25
+      name: Bob
+    required:
+    - name
+    - age

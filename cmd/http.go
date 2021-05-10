@@ -9,8 +9,8 @@ import (
 	"time"
 
 	openapisvr "github.com/ebalkanski/goa/gen/http/openapi/server"
-	playsvr "github.com/ebalkanski/goa/gen/http/play/server"
-	"github.com/ebalkanski/goa/gen/play"
+	usersvr "github.com/ebalkanski/goa/gen/http/user/server"
+	"github.com/ebalkanski/goa/gen/user"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
@@ -18,7 +18,7 @@ import (
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
 // URL. It shuts down the server if any error is received in the error channel.
-func handleHTTPServer(ctx context.Context, host string, playEndpoints *play.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
+func handleHTTPServer(ctx context.Context, host string, userEndpoints *user.Endpoints, wg *sync.WaitGroup, errc chan error, logger *log.Logger, debug bool) {
 
 	// Setup goa log adapter.
 	var (
@@ -49,20 +49,20 @@ func handleHTTPServer(ctx context.Context, host string, playEndpoints *play.Endp
 	// the service input and output data structures to HTTP requests and
 	// responses.
 	var (
-		playServer *playsvr.Server
+		userServer *usersvr.Server
 	)
 	{
 		eh := errorHandler(logger)
-		playServer = playsvr.New(playEndpoints, mux, dec, enc, eh, nil)
+		userServer = usersvr.New(userEndpoints, mux, dec, enc, eh, nil)
 		if debug {
 			servers := goahttp.Servers{
-				playServer,
+				userServer,
 			}
 			servers.Use(httpmdlwr.Debug(mux, os.Stdout))
 		}
 	}
 	// Configure the mux.
-	playsvr.Mount(mux, playServer)
+	usersvr.Mount(mux, userServer)
 	openapisvr.Mount(mux)
 
 	// Wrap the multiplexer with additional middlewares. Middlewares mounted
@@ -76,7 +76,7 @@ func handleHTTPServer(ctx context.Context, host string, playEndpoints *play.Endp
 	// Start HTTP server using default configuration, change the code to
 	// configure the server as required by your service.
 	srv := &http.Server{Addr: ":8080", Handler: handler}
-	for _, m := range playServer.Mounts {
+	for _, m := range userServer.Mounts {
 		logger.Printf("HTTP %q mounted on %s %s", m.Method, m.Verb, m.Pattern)
 	}
 

@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"os"
 
-	playc "github.com/ebalkanski/goa/gen/http/play/client"
+	userc "github.com/ebalkanski/goa/gen/http/user/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -23,13 +23,13 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `play (add|rate)
+	return `user (get|create)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` play add --a 1 --b 2` + "\n" +
+	return os.Args[0] + ` user get --name "Bob"` + "\n" +
 		""
 }
 
@@ -43,19 +43,17 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, interface{}, error) {
 	var (
-		playFlags = flag.NewFlagSet("play", flag.ContinueOnError)
+		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
 
-		playAddFlags = flag.NewFlagSet("add", flag.ExitOnError)
-		playAddAFlag = playAddFlags.String("a", "REQUIRED", "Left operand")
-		playAddBFlag = playAddFlags.String("b", "REQUIRED", "Right operand")
+		userGetFlags    = flag.NewFlagSet("get", flag.ExitOnError)
+		userGetNameFlag = userGetFlags.String("name", "REQUIRED", "")
 
-		playRateFlags    = flag.NewFlagSet("rate", flag.ExitOnError)
-		playRateBodyFlag = playRateFlags.String("body", "REQUIRED", "")
-		playRateIDFlag   = playRateFlags.String("id", "REQUIRED", "")
+		userCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
+		userCreateBodyFlag = userCreateFlags.String("body", "REQUIRED", "")
 	)
-	playFlags.Usage = playUsage
-	playAddFlags.Usage = playAddUsage
-	playRateFlags.Usage = playRateUsage
+	userFlags.Usage = userUsage
+	userGetFlags.Usage = userGetUsage
+	userCreateFlags.Usage = userCreateUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -72,8 +70,8 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
-		case "play":
-			svcf = playFlags
+		case "user":
+			svcf = userFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -89,13 +87,13 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
-		case "play":
+		case "user":
 			switch epn {
-			case "add":
-				epf = playAddFlags
+			case "get":
+				epf = userGetFlags
 
-			case "rate":
-				epf = playRateFlags
+			case "create":
+				epf = userCreateFlags
 
 			}
 
@@ -119,15 +117,15 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "play":
-			c := playc.NewClient(scheme, host, doer, enc, dec, restore)
+		case "user":
+			c := userc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "add":
-				endpoint = c.Add()
-				data, err = playc.BuildAddPayload(*playAddAFlag, *playAddBFlag)
-			case "rate":
-				endpoint = c.Rate()
-				data, err = playc.BuildRatePayload(*playRateBodyFlag, *playRateIDFlag)
+			case "get":
+				endpoint = c.Get()
+				data, err = userc.BuildGetPayload(*userGetNameFlag)
+			case "create":
+				endpoint = c.Create()
+				data, err = userc.BuildCreatePayload(*userCreateBodyFlag)
 			}
 		}
 	}
@@ -138,43 +136,41 @@ func ParseEndpoint(
 	return endpoint, data, nil
 }
 
-// playUsage displays the usage of the play command and its subcommands.
-func playUsage() {
-	fmt.Fprintf(os.Stderr, `The play service is a sandbox for goa testing
+// userUsage displays the usage of the user command and its subcommands.
+func userUsage() {
+	fmt.Fprintf(os.Stderr, `The user service process users
 Usage:
-    %s [globalflags] play COMMAND [flags]
+    %s [globalflags] user COMMAND [flags]
 
 COMMAND:
-    add: Add implements add.
-    rate: Rate implements rate.
+    get: Get implements get.
+    create: Create new user.
 
 Additional help:
-    %s play COMMAND --help
+    %s user COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func playAddUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] play add -a INT -b INT
+func userGetUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] user get -name STRING
 
-Add implements add.
-    -a INT: Left operand
-    -b INT: Right operand
+Get implements get.
+    -name STRING: 
 
 Example:
-    `+os.Args[0]+` play add --a 1 --b 2
+    `+os.Args[0]+` user get --name "Bob"
 `, os.Args[0])
 }
 
-func playRateUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] play rate -body JSON -id INT
+func userCreateUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] user create -body JSON
 
-Rate implements rate.
+Create new user.
     -body JSON: 
-    -id INT: 
 
 Example:
-    `+os.Args[0]+` play rate --body '{
-      "a": 1.1,
-      "b": 2.2
-   }' --id 1
+    `+os.Args[0]+` user create --body '{
+      "age": 25,
+      "name": "Bob"
+   }'
 `, os.Args[0])
 }

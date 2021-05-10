@@ -13,42 +13,39 @@ var _ = API("play", func() {
 	})
 })
 
-var _ = Service("play", func() {
-	Description("The play service is a sandbox for goa testing")
+var _ = Service("user", func() {
+	Description("The user service process users")
 
-	Method("add", func() {
+	Method("get", func() {
 		Payload(func() {
-			Attribute("a", Int, "Left operand", func() {
-				Example(1)
+			Attribute("name", String, func() {
+				Example("Bob")
 			})
-			Attribute("b", Int, "Right operand", func() {
-				Example(2)
+			Required("name")
+		})
+		Result(User, func() {
+			Example(func() {
+				Value(Val{"name": "Bob", "age": 25})
 			})
-			Required("a", "b")
 		})
-
-		Result(Int, func() {
-			Example(3)
-		})
-
 		HTTP(func() {
-			GET("/add/{a}/{b}")
+			GET("/user/{name}")
 			Response(StatusOK)
 		})
 	})
 
-	Method("rate", func() {
-		Payload(func() {
-			Attribute("id", Int, func() {
-				Example(1)
-			})
-			Attribute("rates", MapOf(String, Float64), func() {
-				Example(map[string]float64{"a": 1.1, "b": 2.2})
+	Method("create", func() {
+		Description("Create new user.")
+		Payload(User, func() {
+			Example(func() {
+				Value(Val{"name": "Bob", "age": 25})
 			})
 		})
 		HTTP(func() {
-			POST("/rate/{id}")
-			Body("rates")
+			POST("/user")
+			Response(StatusCreated, func() {
+				Description("User is created successfully.")
+			})
 		})
 	})
 })
