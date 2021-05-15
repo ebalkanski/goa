@@ -25,6 +25,22 @@ paths:
       responses:
         "201":
           description: User is created successfully.
+        "400":
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoaError'
+              example:
+                message: error
+        "500":
+          description: Internal Server Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoaError'
+              example:
+                message: error
   /user/{name}:
     get:
       tags:
@@ -49,8 +65,34 @@ paths:
               example:
                 age: 25
                 name: Bob
+        "400":
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoaError'
+              example:
+                message: error
+        "500":
+          description: Internal Server Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoaError'
+              example:
+                message: error
 components:
   schemas:
+    GoaError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: error
+      example:
+        message: error
+      required:
+      - message
     User:
       type: object
       properties:

@@ -32,6 +32,18 @@ paths:
       responses:
         "201":
           description: User is created successfully.
+        "400":
+          description: Bad Request response.
+          schema:
+            $ref: '#/definitions/UserCreateBadRequestResponseBody'
+            required:
+            - message
+        "500":
+          description: Internal Server Error response.
+          schema:
+            $ref: '#/definitions/UserCreateInternalServerErrorResponseBody'
+            required:
+            - message
       schemes:
       - http
   /user/{name}:
@@ -53,9 +65,43 @@ paths:
             required:
             - name
             - age
+        "400":
+          description: Bad Request response.
+          schema:
+            $ref: '#/definitions/UserGetBadRequestResponseBody'
+            required:
+            - message
+        "500":
+          description: Internal Server Error response.
+          schema:
+            $ref: '#/definitions/UserGetInternalServerErrorResponseBody'
+            required:
+            - message
       schemes:
       - http
 definitions:
+  UserCreateBadRequestResponseBody:
+    title: UserCreateBadRequestResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
+  UserCreateInternalServerErrorResponseBody:
+    title: UserCreateInternalServerErrorResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
   UserCreateRequestBody:
     title: UserCreateRequestBody
     type: object
@@ -73,6 +119,28 @@ definitions:
     required:
     - name
     - age
+  UserGetBadRequestResponseBody:
+    title: UserGetBadRequestResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
+  UserGetInternalServerErrorResponseBody:
+    title: UserGetInternalServerErrorResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
   UserGetResponseBody:
     title: UserGetResponseBody
     type: object

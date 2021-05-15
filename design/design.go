@@ -16,6 +16,9 @@ var _ = API("play", func() {
 var _ = Service("user", func() {
 	Description("The user service process users")
 
+	Error("BadRequest", GoaError)
+	Error("InternalServerError", GoaError)
+
 	Method("get", func() {
 		Payload(func() {
 			Attribute("name", String, func() {
@@ -31,6 +34,8 @@ var _ = Service("user", func() {
 		HTTP(func() {
 			GET("/user/{name}")
 			Response(StatusOK)
+			Response("BadRequest", StatusBadRequest)
+			Response("InternalServerError", StatusInternalServerError)
 		})
 	})
 
@@ -42,6 +47,8 @@ var _ = Service("user", func() {
 			Response(StatusCreated, func() {
 				Description("User is created successfully.")
 			})
+			Response("BadRequest", StatusBadRequest)
+			Response("InternalServerError", StatusInternalServerError)
 		})
 	})
 })

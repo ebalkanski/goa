@@ -46,6 +46,10 @@ func (c *Client) BuildGetRequest(ctx context.Context, v interface{}) (*http.Requ
 // DecodeGetResponse returns a decoder for responses returned by the user get
 // endpoint. restoreBody controls whether the response body should be restored
 // after having been read.
+// DecodeGetResponse may return the following errors:
+//	- "BadRequest" (type *user.GoaError): http.StatusBadRequest
+//	- "InternalServerError" (type *user.GoaError): http.StatusInternalServerError
+//	- error: internal error
 func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
@@ -76,6 +80,34 @@ func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 			}
 			res := NewGetUserOK(&body)
 			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body GetBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("user", "get", err)
+			}
+			err = ValidateGetBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("user", "get", err)
+			}
+			return nil, NewGetBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body GetInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("user", "get", err)
+			}
+			err = ValidateGetInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("user", "get", err)
+			}
+			return nil, NewGetInternalServerError(&body)
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("user", "get", resp.StatusCode, string(body))
@@ -117,6 +149,10 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // DecodeCreateResponse returns a decoder for responses returned by the user
 // create endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
+// DecodeCreateResponse may return the following errors:
+//	- "BadRequest" (type *user.GoaError): http.StatusBadRequest
+//	- "InternalServerError" (type *user.GoaError): http.StatusInternalServerError
+//	- error: internal error
 func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
@@ -134,6 +170,34 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusCreated:
 			return nil, nil
+		case http.StatusBadRequest:
+			var (
+				body CreateBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("user", "create", err)
+			}
+			err = ValidateCreateBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("user", "create", err)
+			}
+			return nil, NewCreateBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body CreateInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("user", "create", err)
+			}
+			err = ValidateCreateInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("user", "create", err)
+			}
+			return nil, NewCreateInternalServerError(&body)
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("user", "create", resp.StatusCode, string(body))

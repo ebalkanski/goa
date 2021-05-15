@@ -6,9 +6,11 @@ import (
 	"log"
 
 	goauser "github.com/ebalkanski/goa/gen/user"
+	"github.com/ebalkanski/goa/internal/service/goa_errors"
 )
 
 var UserNotFound = errors.New("user is not found")
+var UserExists = errors.New("such user already exists")
 
 type userStorage interface {
 	User(ctx context.Context, name string) (*goauser.User, error)
@@ -32,11 +34,11 @@ func NewUser(logger *log.Logger, storage userStorage) goauser.Service {
 func (s *user) Get(ctx context.Context, p *goauser.GetPayload) (res *goauser.User, err error) {
 	u, err := s.storage.User(ctx, p.Name)
 	if err != nil {
-		if err == UserNotFound {
-			return nil, err
+		if err == UserNotFound || err == UserExists {
+			return nil, goa_errors.NewBadRequestError(err)
 		}
 
-		return nil, err
+		return nil, goa_errors.NewBadRequestError(UserNotFound)
 	}
 
 	return u, nil
@@ -45,7 +47,11 @@ func (s *user) Get(ctx context.Context, p *goauser.GetPayload) (res *goauser.Use
 // Create creates a new user
 func (s *user) Create(ctx context.Context, u *goauser.User) (err error) {
 	if err := s.storage.CreateUser(ctx, u); err != nil {
-		return err
+		if err == UserExists {
+			return goa_errors.NewBadRequestError(err)
+		}
+		return goa_errors.NewBadRequestError(errors.New("user cannot be created"))
 	}
+
 	return nil
 }

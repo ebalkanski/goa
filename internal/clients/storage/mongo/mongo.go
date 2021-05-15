@@ -2,19 +2,16 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
-	"github.com/ebalkanski/goa/internal/service/user"
-
 	"go.mongodb.org/mongo-driver/bson"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	goauser "github.com/ebalkanski/goa/gen/user"
+	"github.com/ebalkanski/goa/internal/service/user"
 )
 
 type mongoDB struct {
@@ -67,7 +64,7 @@ func (m mongoDB) CreateUser(ctx context.Context, u *goauser.User) error {
 		return err
 	}
 	if ok {
-		return fmt.Errorf("user with name %s already exists", u.Name)
+		return user.UserExists
 	}
 
 	users := m.Database(m.db).Collection("users")

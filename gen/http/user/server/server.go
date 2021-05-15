@@ -104,7 +104,7 @@ func NewGetHandler(
 	var (
 		decodeRequest  = DecodeGetRequest(mux, decoder)
 		encodeResponse = EncodeGetResponse(encoder)
-		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
+		encodeError    = EncodeGetError(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
@@ -155,7 +155,7 @@ func NewCreateHandler(
 	var (
 		decodeRequest  = DecodeCreateRequest(mux, decoder)
 		encodeResponse = EncodeCreateResponse(encoder)
-		encodeError    = goahttp.ErrorEncoder(encoder, formatter)
+		encodeError    = EncodeCreateError(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))

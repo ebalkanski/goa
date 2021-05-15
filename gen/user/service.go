@@ -39,3 +39,18 @@ type User struct {
 	Name string
 	Age  int
 }
+
+// GoaError is the error returned from services.
+type GoaError struct {
+	Message string
+}
+
+// Error returns an error description.
+func (e *GoaError) Error() string {
+	return "GoaError is the error returned from services."
+}
+
+// ErrorName returns "GoaError".
+func (e *GoaError) ErrorName() string {
+	return "BadRequest"
+}

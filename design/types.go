@@ -14,3 +14,21 @@ var User = Type("User", func() {
 	})
 	Required("name", "age")
 })
+
+var GoaError = Type("GoaError", func() {
+	Description("GoaError is the error returned from services.")
+	Field(1, "message", String, func() {
+		Example("error")
+	})
+	Required("message")
+})
+
+var BadRequest = Type("BadRequest", func() {
+	Description("BadRequest is the error returned when request data is invalid.")
+	Reference(GoaError)
+})
+
+var InternalServerError = Type("InternalServerError", func() {
+	Description("InternalServerError is the error returned when internal error occurs.")
+	Reference(GoaError)
+})

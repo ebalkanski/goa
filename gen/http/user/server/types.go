@@ -26,12 +26,72 @@ type GetResponseBody struct {
 	Age  int    `form:"age" json:"age" xml:"age"`
 }
 
+// GetBadRequestResponseBody is the type of the "user" service "get" endpoint
+// HTTP response body for the "BadRequest" error.
+type GetBadRequestResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// GetInternalServerErrorResponseBody is the type of the "user" service "get"
+// endpoint HTTP response body for the "InternalServerError" error.
+type GetInternalServerErrorResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// CreateBadRequestResponseBody is the type of the "user" service "create"
+// endpoint HTTP response body for the "BadRequest" error.
+type CreateBadRequestResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// CreateInternalServerErrorResponseBody is the type of the "user" service
+// "create" endpoint HTTP response body for the "InternalServerError" error.
+type CreateInternalServerErrorResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // NewGetResponseBody builds the HTTP response body from the result of the
 // "get" endpoint of the "user" service.
 func NewGetResponseBody(res *user.User) *GetResponseBody {
 	body := &GetResponseBody{
 		Name: res.Name,
 		Age:  res.Age,
+	}
+	return body
+}
+
+// NewGetBadRequestResponseBody builds the HTTP response body from the result
+// of the "get" endpoint of the "user" service.
+func NewGetBadRequestResponseBody(res *user.GoaError) *GetBadRequestResponseBody {
+	body := &GetBadRequestResponseBody{
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewGetInternalServerErrorResponseBody builds the HTTP response body from the
+// result of the "get" endpoint of the "user" service.
+func NewGetInternalServerErrorResponseBody(res *user.GoaError) *GetInternalServerErrorResponseBody {
+	body := &GetInternalServerErrorResponseBody{
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewCreateBadRequestResponseBody builds the HTTP response body from the
+// result of the "create" endpoint of the "user" service.
+func NewCreateBadRequestResponseBody(res *user.GoaError) *CreateBadRequestResponseBody {
+	body := &CreateBadRequestResponseBody{
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewCreateInternalServerErrorResponseBody builds the HTTP response body from
+// the result of the "create" endpoint of the "user" service.
+func NewCreateInternalServerErrorResponseBody(res *user.GoaError) *CreateInternalServerErrorResponseBody {
+	body := &CreateInternalServerErrorResponseBody{
+		Message: res.Message,
 	}
 	return body
 }

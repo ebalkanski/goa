@@ -26,6 +26,30 @@ type GetResponseBody struct {
 	Age  *int    `form:"age,omitempty" json:"age,omitempty" xml:"age,omitempty"`
 }
 
+// GetBadRequestResponseBody is the type of the "user" service "get" endpoint
+// HTTP response body for the "BadRequest" error.
+type GetBadRequestResponseBody struct {
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// GetInternalServerErrorResponseBody is the type of the "user" service "get"
+// endpoint HTTP response body for the "InternalServerError" error.
+type GetInternalServerErrorResponseBody struct {
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// CreateBadRequestResponseBody is the type of the "user" service "create"
+// endpoint HTTP response body for the "BadRequest" error.
+type CreateBadRequestResponseBody struct {
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// CreateInternalServerErrorResponseBody is the type of the "user" service
+// "create" endpoint HTTP response body for the "InternalServerError" error.
+type CreateInternalServerErrorResponseBody struct {
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // NewCreateRequestBody builds the HTTP request body from the payload of the
 // "create" endpoint of the "user" service.
 func NewCreateRequestBody(p *user.User) *CreateRequestBody {
@@ -47,6 +71,44 @@ func NewGetUserOK(body *GetResponseBody) *user.User {
 	return v
 }
 
+// NewGetBadRequest builds a user service get endpoint BadRequest error.
+func NewGetBadRequest(body *GetBadRequestResponseBody) *user.GoaError {
+	v := &user.GoaError{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewGetInternalServerError builds a user service get endpoint
+// InternalServerError error.
+func NewGetInternalServerError(body *GetInternalServerErrorResponseBody) *user.GoaError {
+	v := &user.GoaError{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewCreateBadRequest builds a user service create endpoint BadRequest error.
+func NewCreateBadRequest(body *CreateBadRequestResponseBody) *user.GoaError {
+	v := &user.GoaError{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewCreateInternalServerError builds a user service create endpoint
+// InternalServerError error.
+func NewCreateInternalServerError(body *CreateInternalServerErrorResponseBody) *user.GoaError {
+	v := &user.GoaError{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // ValidateGetResponseBody runs the validations defined on GetResponseBody
 func ValidateGetResponseBody(body *GetResponseBody) (err error) {
 	if body.Name == nil {
@@ -54,6 +116,42 @@ func ValidateGetResponseBody(body *GetResponseBody) (err error) {
 	}
 	if body.Age == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("age", "body"))
+	}
+	return
+}
+
+// ValidateGetBadRequestResponseBody runs the validations defined on
+// get_BadRequest_response_body
+func ValidateGetBadRequestResponseBody(body *GetBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateGetInternalServerErrorResponseBody runs the validations defined on
+// get_InternalServerError_response_body
+func ValidateGetInternalServerErrorResponseBody(body *GetInternalServerErrorResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateCreateBadRequestResponseBody runs the validations defined on
+// create_BadRequest_response_body
+func ValidateCreateBadRequestResponseBody(body *CreateBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateCreateInternalServerErrorResponseBody runs the validations defined
+// on create_InternalServerError_response_body
+func ValidateCreateInternalServerErrorResponseBody(body *CreateInternalServerErrorResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }

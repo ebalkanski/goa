@@ -8,12 +8,15 @@ import (
 	"sync"
 	"time"
 
-	openapisvr "github.com/ebalkanski/goa/gen/http/openapi/server"
-	usersvr "github.com/ebalkanski/goa/gen/http/user/server"
-	"github.com/ebalkanski/goa/gen/user"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
 	"goa.design/goa/v3/middleware"
+	goa "goa.design/goa/v3/pkg"
+
+	openapisvr "github.com/ebalkanski/goa/gen/http/openapi/server"
+	usersvr "github.com/ebalkanski/goa/gen/http/user/server"
+	"github.com/ebalkanski/goa/gen/user"
+	"github.com/ebalkanski/goa/internal/service/goa_errors"
 )
 
 // handleHTTPServer starts configures and starts a HTTP server on the given
@@ -53,7 +56,7 @@ func handleHTTPServer(ctx context.Context, host string, userEndpoints *user.Endp
 	)
 	{
 		eh := errorHandler(logger)
-		userServer = usersvr.New(userEndpoints, mux, dec, enc, eh, nil)
+		userServer = usersvr.New(userEndpoints, mux, dec, enc, eh, customErrorResponse)
 		if debug {
 			servers := goahttp.Servers{
 				userServer,
@@ -110,4 +113,17 @@ func errorHandler(logger *log.Logger) func(context.Context, http.ResponseWriter,
 		_, _ = w.Write([]byte("[" + id + "] encoding: " + err.Error()))
 		logger.Printf("[%s] ERROR: %s", id, err.Error())
 	}
+}
+
+// customErrorResponse converts err into a global goa error
+func customErrorResponse(err error) goahttp.Statuser {
+	if serr, ok := err.(*goa.ServiceError); ok {
+		return goa_errors.NewBadRequestError(serr)
+	}
+
+	if gerr, ok := err.(*goa_errors.Error); ok {
+		return gerr
+	}
+
+	return goa_errors.NewInternalServerError(err)
 }
