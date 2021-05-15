@@ -8,58 +8,50 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
+	goauser "github.com/ebalkanski/goa/gen/user"
+	storage "github.com/ebalkanski/goa/internal/clients/storage/mongo"
+	"github.com/ebalkanski/goa/internal/service/user"
 	"github.com/kelseyhightower/envconfig"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
-
-	"github.com/ebalkanski/goa/gen/user"
-	"github.com/ebalkanski/goa/internal/service"
 )
 
 func main() {
-	// Load configuration from environment variables
-	var cfg config
-	if err := envconfig.Process("", &cfg); err != nil {
-		log.Fatal("error loading configuration")
-	}
+	// Init context
+	ctx, cancel := context.WithCancel(context.Background())
 
-	// Init Mongo client
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.Mongo.URI))
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err = client.Ping(ctx, readpref.Primary()); err != nil {
-		log.Fatal(err)
-	}
-
-	// Setup logger. Replace logger with your own log package of choice.
+	// Setup logger
 	var (
 		logger *log.Logger
 	)
 	{
-		logger = log.New(os.Stderr, "[playapi] ", log.Ltime)
+		logger = log.New(os.Stderr, "[goa] ", log.Ltime)
 	}
+
+	// Load configuration from environment variables
+	var cfg config
+	if err := envconfig.Process("", &cfg); err != nil {
+		logger.Fatal("error loading configuration")
+	}
+
+	// Init Mongo client
+	mongoDB := storage.NewMongo(logger, ctx, cfg.Mongo.URI, cfg.Mongo.DB)
+	defer mongoDB.Disconnect(ctx)
 
 	// Initialize the services.
 	var (
-		userSvc user.Service
+		userSvc goauser.Service
 	)
 	{
-		userSvc = service.NewUser(logger)
+		userSvc = user.NewUser(logger, mongoDB)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
 	// potentially running in different processes.
 	var (
-		userEndpoints *user.Endpoints
+		userEndpoints *goauser.Endpoints
 	)
 	{
-		userEndpoints = user.NewEndpoints(userSvc)
+		userEndpoints = goauser.NewEndpoints(userSvc)
 	}
 
 	// Create channel used by both the signal handler and server goroutines
@@ -75,7 +67,6 @@ func main() {
 	}()
 
 	var wg sync.WaitGroup
-	ctx, cancel = context.WithCancel(context.Background())
 
 	// Start server
 	handleHTTPServer(ctx, "localhost:8080", userEndpoints, &wg, errc, logger, false)
