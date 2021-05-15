@@ -53,6 +53,19 @@ var _ = Service("user", func() {
 		})
 	})
 
+	Method("edit", func() {
+		Description("Edit user.")
+		Payload(User)
+		HTTP(func() {
+			PUT("/user")
+			Response(StatusNoContent, func() {
+				Description("User is edited successfully.")
+			})
+			Response("BadRequest", StatusBadRequest)
+			Response("InternalServerError", StatusInternalServerError)
+		})
+	})
+
 	Method("delete", func() {
 		Description("Delete user.")
 		Payload(func() {

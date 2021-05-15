@@ -23,6 +23,9 @@ type Client struct {
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
 
+	// Edit Doer is the HTTP client used to make requests to the edit endpoint.
+	EditDoer goahttp.Doer
+
 	// Delete Doer is the HTTP client used to make requests to the delete endpoint.
 	DeleteDoer goahttp.Doer
 
@@ -48,6 +51,7 @@ func NewClient(
 	return &Client{
 		GetDoer:             doer,
 		CreateDoer:          doer,
+		EditDoer:            doer,
 		DeleteDoer:          doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -95,6 +99,30 @@ func (c *Client) Create() goa.Endpoint {
 		resp, err := c.CreateDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("user", "create", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Edit returns an endpoint that makes HTTP requests to the user service edit
+// server.
+func (c *Client) Edit() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeEditRequest(c.encoder)
+		decodeResponse = DecodeEditResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildEditRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.EditDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("user", "edit", err)
 		}
 		return decodeResponse(resp)
 	}

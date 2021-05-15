@@ -205,6 +205,96 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 	}
 }
 
+// BuildEditRequest instantiates a HTTP request object with method and path set
+// to call the "user" service "edit" endpoint
+func (c *Client) BuildEditRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: EditUserPath()}
+	req, err := http.NewRequest("PUT", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("user", "edit", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeEditRequest returns an encoder for requests sent to the user edit
+// server.
+func EncodeEditRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*user.User)
+		if !ok {
+			return goahttp.ErrInvalidType("user", "edit", "*user.User", v)
+		}
+		body := NewEditRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("user", "edit", err)
+		}
+		return nil
+	}
+}
+
+// DecodeEditResponse returns a decoder for responses returned by the user edit
+// endpoint. restoreBody controls whether the response body should be restored
+// after having been read.
+// DecodeEditResponse may return the following errors:
+//	- "BadRequest" (type *user.GoaError): http.StatusBadRequest
+//	- "InternalServerError" (type *user.GoaError): http.StatusInternalServerError
+//	- error: internal error
+func DecodeEditResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusNoContent:
+			return nil, nil
+		case http.StatusBadRequest:
+			var (
+				body EditBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("user", "edit", err)
+			}
+			err = ValidateEditBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("user", "edit", err)
+			}
+			return nil, NewEditBadRequest(&body)
+		case http.StatusInternalServerError:
+			var (
+				body EditInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("user", "edit", err)
+			}
+			err = ValidateEditInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("user", "edit", err)
+			}
+			return nil, NewEditInternalServerError(&body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("user", "edit", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // BuildDeleteRequest instantiates a HTTP request object with method and path
 // set to call the "user" service "delete" endpoint
 func (c *Client) BuildDeleteRequest(ctx context.Context, v interface{}) (*http.Request, error) {

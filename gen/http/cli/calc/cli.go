@@ -23,7 +23,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `user (get|create|delete)
+	return `user (get|create|edit|delete)
 `
 }
 
@@ -51,12 +51,16 @@ func ParseEndpoint(
 		userCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
 		userCreateBodyFlag = userCreateFlags.String("body", "REQUIRED", "")
 
+		userEditFlags    = flag.NewFlagSet("edit", flag.ExitOnError)
+		userEditBodyFlag = userEditFlags.String("body", "REQUIRED", "")
+
 		userDeleteFlags    = flag.NewFlagSet("delete", flag.ExitOnError)
 		userDeleteNameFlag = userDeleteFlags.String("name", "REQUIRED", "")
 	)
 	userFlags.Usage = userUsage
 	userGetFlags.Usage = userGetUsage
 	userCreateFlags.Usage = userCreateUsage
+	userEditFlags.Usage = userEditUsage
 	userDeleteFlags.Usage = userDeleteUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
@@ -99,6 +103,9 @@ func ParseEndpoint(
 			case "create":
 				epf = userCreateFlags
 
+			case "edit":
+				epf = userEditFlags
+
 			case "delete":
 				epf = userDeleteFlags
 
@@ -133,6 +140,9 @@ func ParseEndpoint(
 			case "create":
 				endpoint = c.Create()
 				data, err = userc.BuildCreatePayload(*userCreateBodyFlag)
+			case "edit":
+				endpoint = c.Edit()
+				data, err = userc.BuildEditPayload(*userEditBodyFlag)
 			case "delete":
 				endpoint = c.Delete()
 				data, err = userc.BuildDeletePayload(*userDeleteNameFlag)
@@ -155,6 +165,7 @@ Usage:
 COMMAND:
     get: Fetch user.
     create: Create new user.
+    edit: Edit user.
     delete: Delete user.
 
 Additional help:
@@ -180,6 +191,20 @@ Create new user.
 
 Example:
     `+os.Args[0]+` user create --body '{
+      "age": 25,
+      "name": "Bob"
+   }'
+`, os.Args[0])
+}
+
+func userEditUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] user edit -body JSON
+
+Edit user.
+    -body JSON: 
+
+Example:
+    `+os.Args[0]+` user edit --body '{
       "age": 25,
       "name": "Bob"
    }'

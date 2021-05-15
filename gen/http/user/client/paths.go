@@ -21,6 +21,11 @@ func CreateUserPath() string {
 	return "/user"
 }
 
+// EditUserPath returns the URL path to the user service edit HTTP endpoint.
+func EditUserPath() string {
+	return "/user"
+}
+
 // DeleteUserPath returns the URL path to the user service delete HTTP endpoint.
 func DeleteUserPath(name string) string {
 	return fmt.Sprintf("/user/%v", name)

@@ -45,6 +45,25 @@ func BuildCreatePayload(userCreateBody string) (*user.User, error) {
 	return v, nil
 }
 
+// BuildEditPayload builds the payload for the user edit endpoint from CLI
+// flags.
+func BuildEditPayload(userEditBody string) (*user.User, error) {
+	var err error
+	var body EditRequestBody
+	{
+		err = json.Unmarshal([]byte(userEditBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"age\": 25,\n      \"name\": \"Bob\"\n   }'")
+		}
+	}
+	v := &user.User{
+		Name: body.Name,
+		Age:  body.Age,
+	}
+
+	return v, nil
+}
+
 // BuildDeletePayload builds the payload for the user delete endpoint from CLI
 // flags.
 func BuildDeletePayload(userDeleteName string) (*user.DeletePayload, error) {

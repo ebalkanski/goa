@@ -41,6 +41,40 @@ paths:
                 $ref: '#/components/schemas/GoaError'
               example:
                 message: error
+    put:
+      tags:
+      - user
+      summary: edit user
+      description: Edit user.
+      operationId: user#edit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              age: 25
+              name: Bob
+      responses:
+        "204":
+          description: User is edited successfully.
+        "400":
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoaError'
+              example:
+                message: error
+        "500":
+          description: Internal Server Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoaError'
+              example:
+                message: error
   /user/{name}:
     delete:
       tags:

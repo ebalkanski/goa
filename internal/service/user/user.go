@@ -14,7 +14,8 @@ var UserExists = errors.New("such user already exists")
 
 type UserStorage interface {
 	User(ctx context.Context, name string) (*goauser.User, error)
-	CreateUser(ctx context.Context, u *goauser.User) error
+	Create(ctx context.Context, u *goauser.User) error
+	Edit(ctx context.Context, u *goauser.User) error
 	Delete(ctx context.Context, name string) error
 }
 
@@ -47,7 +48,7 @@ func (s *user) Get(ctx context.Context, p *goauser.GetPayload) (res *goauser.Use
 
 // Create creates a new user
 func (s *user) Create(ctx context.Context, u *goauser.User) (err error) {
-	if err := s.storage.CreateUser(ctx, u); err != nil {
+	if err := s.storage.Create(ctx, u); err != nil {
 		if err == UserExists {
 			return goa_errors.NewBadRequestError(err)
 		}
@@ -55,6 +56,11 @@ func (s *user) Create(ctx context.Context, u *goauser.User) (err error) {
 	}
 
 	return nil
+}
+
+// Edit edits a user
+func (s *user) Edit(ctx context.Context, u *goauser.User) (err error) {
+	return s.storage.Edit(ctx, u)
 }
 
 // Delete deletes a user

@@ -19,6 +19,13 @@ type CreateRequestBody struct {
 	Age  *int    `form:"age,omitempty" json:"age,omitempty" xml:"age,omitempty"`
 }
 
+// EditRequestBody is the type of the "user" service "edit" endpoint HTTP
+// request body.
+type EditRequestBody struct {
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Age  *int    `form:"age,omitempty" json:"age,omitempty" xml:"age,omitempty"`
+}
+
 // GetResponseBody is the type of the "user" service "get" endpoint HTTP
 // response body.
 type GetResponseBody struct {
@@ -47,6 +54,18 @@ type CreateBadRequestResponseBody struct {
 // CreateInternalServerErrorResponseBody is the type of the "user" service
 // "create" endpoint HTTP response body for the "InternalServerError" error.
 type CreateInternalServerErrorResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// EditBadRequestResponseBody is the type of the "user" service "edit" endpoint
+// HTTP response body for the "BadRequest" error.
+type EditBadRequestResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// EditInternalServerErrorResponseBody is the type of the "user" service "edit"
+// endpoint HTTP response body for the "InternalServerError" error.
+type EditInternalServerErrorResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
@@ -108,6 +127,24 @@ func NewCreateInternalServerErrorResponseBody(res *user.GoaError) *CreateInterna
 	return body
 }
 
+// NewEditBadRequestResponseBody builds the HTTP response body from the result
+// of the "edit" endpoint of the "user" service.
+func NewEditBadRequestResponseBody(res *user.GoaError) *EditBadRequestResponseBody {
+	body := &EditBadRequestResponseBody{
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewEditInternalServerErrorResponseBody builds the HTTP response body from
+// the result of the "edit" endpoint of the "user" service.
+func NewEditInternalServerErrorResponseBody(res *user.GoaError) *EditInternalServerErrorResponseBody {
+	body := &EditInternalServerErrorResponseBody{
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewDeleteBadRequestResponseBody builds the HTTP response body from the
 // result of the "delete" endpoint of the "user" service.
 func NewDeleteBadRequestResponseBody(res *user.GoaError) *DeleteBadRequestResponseBody {
@@ -144,6 +181,16 @@ func NewCreateUser(body *CreateRequestBody) *user.User {
 	return v
 }
 
+// NewEditUser builds a user service edit endpoint payload.
+func NewEditUser(body *EditRequestBody) *user.User {
+	v := &user.User{
+		Name: *body.Name,
+		Age:  *body.Age,
+	}
+
+	return v
+}
+
 // NewDeletePayload builds a user service delete endpoint payload.
 func NewDeletePayload(name string) *user.DeletePayload {
 	v := &user.DeletePayload{}
@@ -154,6 +201,17 @@ func NewDeletePayload(name string) *user.DeletePayload {
 
 // ValidateCreateRequestBody runs the validations defined on CreateRequestBody
 func ValidateCreateRequestBody(body *CreateRequestBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Age == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("age", "body"))
+	}
+	return
+}
+
+// ValidateEditRequestBody runs the validations defined on EditRequestBody
+func ValidateEditRequestBody(body *EditRequestBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}

@@ -17,6 +17,7 @@ import (
 type Endpoints struct {
 	Get    goa.Endpoint
 	Create goa.Endpoint
+	Edit   goa.Endpoint
 	Delete goa.Endpoint
 }
 
@@ -25,6 +26,7 @@ func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		Get:    NewGetEndpoint(s),
 		Create: NewCreateEndpoint(s),
+		Edit:   NewEditEndpoint(s),
 		Delete: NewDeleteEndpoint(s),
 	}
 }
@@ -33,6 +35,7 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Get = m(e.Get)
 	e.Create = m(e.Create)
+	e.Edit = m(e.Edit)
 	e.Delete = m(e.Delete)
 }
 
@@ -51,6 +54,15 @@ func NewCreateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		p := req.(*User)
 		return nil, s.Create(ctx, p)
+	}
+}
+
+// NewEditEndpoint returns an endpoint function that calls the method "edit" of
+// service "user".
+func NewEditEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*User)
+		return nil, s.Edit(ctx, p)
 	}
 }
 

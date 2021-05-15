@@ -14,6 +14,38 @@ produces:
 - application/gob
 paths:
   /user:
+    put:
+      tags:
+      - user
+      summary: edit user
+      description: Edit user.
+      operationId: user#edit
+      parameters:
+      - name: EditRequestBody
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/UserEditRequestBody'
+          required:
+          - name
+          - age
+      responses:
+        "204":
+          description: User is edited successfully.
+        "400":
+          description: Bad Request response.
+          schema:
+            $ref: '#/definitions/UserEditBadRequestResponseBody'
+            required:
+            - message
+        "500":
+          description: Internal Server Error response.
+          schema:
+            $ref: '#/definitions/UserEditInternalServerErrorResponseBody'
+            required:
+            - message
+      schemes:
+      - http
     post:
       tags:
       - user
@@ -170,6 +202,45 @@ definitions:
       message: error
     required:
     - message
+  UserEditBadRequestResponseBody:
+    title: UserEditBadRequestResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
+  UserEditInternalServerErrorResponseBody:
+    title: UserEditInternalServerErrorResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
+  UserEditRequestBody:
+    title: UserEditRequestBody
+    type: object
+    properties:
+      age:
+        type: integer
+        example: 25
+        format: int64
+      name:
+        type: string
+        example: Bob
+    example:
+      age: 25
+      name: Bob
+    required:
+    - name
+    - age
   UserGetBadRequestResponseBody:
     title: UserGetBadRequestResponseBody
     type: object

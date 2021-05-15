@@ -17,14 +17,16 @@ import (
 type Client struct {
 	GetEndpoint    goa.Endpoint
 	CreateEndpoint goa.Endpoint
+	EditEndpoint   goa.Endpoint
 	DeleteEndpoint goa.Endpoint
 }
 
 // NewClient initializes a "user" service client given the endpoints.
-func NewClient(get, create, delete_ goa.Endpoint) *Client {
+func NewClient(get, create, edit, delete_ goa.Endpoint) *Client {
 	return &Client{
 		GetEndpoint:    get,
 		CreateEndpoint: create,
+		EditEndpoint:   edit,
 		DeleteEndpoint: delete_,
 	}
 }
@@ -42,6 +44,12 @@ func (c *Client) Get(ctx context.Context, p *GetPayload) (res *User, err error) 
 // Create calls the "create" endpoint of the "user" service.
 func (c *Client) Create(ctx context.Context, p *User) (err error) {
 	_, err = c.CreateEndpoint(ctx, p)
+	return
+}
+
+// Edit calls the "edit" endpoint of the "user" service.
+func (c *Client) Edit(ctx context.Context, p *User) (err error) {
+	_, err = c.EditEndpoint(ctx, p)
 	return
 }
 

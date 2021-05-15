@@ -57,7 +57,7 @@ func (m mongoDB) User(ctx context.Context, name string) (*goauser.User, error) {
 }
 
 // CreateUser creates a user
-func (m mongoDB) CreateUser(ctx context.Context, u *goauser.User) error {
+func (m mongoDB) Create(ctx context.Context, u *goauser.User) error {
 	ok, err := m.userExists(ctx, u)
 
 	if err != nil {
@@ -75,6 +75,25 @@ func (m mongoDB) CreateUser(ctx context.Context, u *goauser.User) error {
 	}
 
 	return nil
+}
+
+// Edit edits a user
+func (m mongoDB) Edit(ctx context.Context, u *goauser.User) error {
+	users := m.Database(m.db).Collection("users")
+	filter := bson.D{{"name", u.Name}}
+	update := bson.D{
+		{"$set", bson.D{{"age", u.Age}}},
+	}
+
+	updateResult, err := users.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	if updateResult.MatchedCount == 1 {
+		return nil
+	}
+
+	return user.UserNotFound
 }
 
 // Delete deletes a user

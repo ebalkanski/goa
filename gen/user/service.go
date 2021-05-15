@@ -17,6 +17,8 @@ type Service interface {
 	Get(context.Context, *GetPayload) (res *User, err error)
 	// Create new user.
 	Create(context.Context, *User) (err error)
+	// Edit user.
+	Edit(context.Context, *User) (err error)
 	// Delete user.
 	Delete(context.Context, *DeletePayload) (err error)
 }
@@ -29,7 +31,7 @@ const ServiceName = "user"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"get", "create", "delete"}
+var MethodNames = [4]string{"get", "create", "edit", "delete"}
 
 // GetPayload is the payload type of the user service get method.
 type GetPayload struct {
