@@ -13,10 +13,12 @@ import (
 
 // The user service process users
 type Service interface {
-	// Get implements get.
+	// Fetch user.
 	Get(context.Context, *GetPayload) (res *User, err error)
 	// Create new user.
 	Create(context.Context, *User) (err error)
+	// Delete user.
+	Delete(context.Context, *DeletePayload) (err error)
 }
 
 // ServiceName is the name of the service as defined in the design. This is the
@@ -27,7 +29,7 @@ const ServiceName = "user"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [2]string{"get", "create"}
+var MethodNames = [3]string{"get", "create", "delete"}
 
 // GetPayload is the payload type of the user service get method.
 type GetPayload struct {
@@ -38,6 +40,11 @@ type GetPayload struct {
 type User struct {
 	Name string
 	Age  int
+}
+
+// DeletePayload is the payload type of the user service delete method.
+type DeletePayload struct {
+	Name string
 }
 
 // GoaError is the error returned from services.

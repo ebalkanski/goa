@@ -23,7 +23,7 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `user (get|create)
+	return `user (get|create|delete)
 `
 }
 
@@ -50,10 +50,14 @@ func ParseEndpoint(
 
 		userCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
 		userCreateBodyFlag = userCreateFlags.String("body", "REQUIRED", "")
+
+		userDeleteFlags    = flag.NewFlagSet("delete", flag.ExitOnError)
+		userDeleteNameFlag = userDeleteFlags.String("name", "REQUIRED", "")
 	)
 	userFlags.Usage = userUsage
 	userGetFlags.Usage = userGetUsage
 	userCreateFlags.Usage = userCreateUsage
+	userDeleteFlags.Usage = userDeleteUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -95,6 +99,9 @@ func ParseEndpoint(
 			case "create":
 				epf = userCreateFlags
 
+			case "delete":
+				epf = userDeleteFlags
+
 			}
 
 		}
@@ -126,6 +133,9 @@ func ParseEndpoint(
 			case "create":
 				endpoint = c.Create()
 				data, err = userc.BuildCreatePayload(*userCreateBodyFlag)
+			case "delete":
+				endpoint = c.Delete()
+				data, err = userc.BuildDeletePayload(*userDeleteNameFlag)
 			}
 		}
 	}
@@ -143,8 +153,9 @@ Usage:
     %s [globalflags] user COMMAND [flags]
 
 COMMAND:
-    get: Get implements get.
+    get: Fetch user.
     create: Create new user.
+    delete: Delete user.
 
 Additional help:
     %s user COMMAND --help
@@ -153,7 +164,7 @@ Additional help:
 func userGetUsage() {
 	fmt.Fprintf(os.Stderr, `%s [flags] user get -name STRING
 
-Get implements get.
+Fetch user.
     -name STRING: 
 
 Example:
@@ -172,5 +183,16 @@ Example:
       "age": 25,
       "name": "Bob"
    }'
+`, os.Args[0])
+}
+
+func userDeleteUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] user delete -name STRING
+
+Delete user.
+    -name STRING: 
+
+Example:
+    `+os.Args[0]+` user delete --name "Bob"
 `, os.Args[0])
 }

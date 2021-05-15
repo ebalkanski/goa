@@ -20,6 +20,7 @@ var _ = Service("user", func() {
 	Error("InternalServerError", GoaError)
 
 	Method("get", func() {
+		Description("Fetch user.")
 		Payload(func() {
 			Attribute("name", String, func() {
 				Example("Bob")
@@ -47,6 +48,22 @@ var _ = Service("user", func() {
 			Response(StatusCreated, func() {
 				Description("User is created successfully.")
 			})
+			Response("BadRequest", StatusBadRequest)
+			Response("InternalServerError", StatusInternalServerError)
+		})
+	})
+
+	Method("delete", func() {
+		Description("Delete user.")
+		Payload(func() {
+			Attribute("name", String, func() {
+				Example("Bob")
+			})
+			Required("name")
+		})
+		HTTP(func() {
+			DELETE("/user/{name}")
+			Response(StatusNoContent)
 			Response("BadRequest", StatusBadRequest)
 			Response("InternalServerError", StatusInternalServerError)
 		})

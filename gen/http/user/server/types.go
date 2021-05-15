@@ -50,6 +50,18 @@ type CreateInternalServerErrorResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
+// DeleteBadRequestResponseBody is the type of the "user" service "delete"
+// endpoint HTTP response body for the "BadRequest" error.
+type DeleteBadRequestResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// DeleteInternalServerErrorResponseBody is the type of the "user" service
+// "delete" endpoint HTTP response body for the "InternalServerError" error.
+type DeleteInternalServerErrorResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
 // NewGetResponseBody builds the HTTP response body from the result of the
 // "get" endpoint of the "user" service.
 func NewGetResponseBody(res *user.User) *GetResponseBody {
@@ -96,6 +108,24 @@ func NewCreateInternalServerErrorResponseBody(res *user.GoaError) *CreateInterna
 	return body
 }
 
+// NewDeleteBadRequestResponseBody builds the HTTP response body from the
+// result of the "delete" endpoint of the "user" service.
+func NewDeleteBadRequestResponseBody(res *user.GoaError) *DeleteBadRequestResponseBody {
+	body := &DeleteBadRequestResponseBody{
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewDeleteInternalServerErrorResponseBody builds the HTTP response body from
+// the result of the "delete" endpoint of the "user" service.
+func NewDeleteInternalServerErrorResponseBody(res *user.GoaError) *DeleteInternalServerErrorResponseBody {
+	body := &DeleteInternalServerErrorResponseBody{
+		Message: res.Message,
+	}
+	return body
+}
+
 // NewGetPayload builds a user service get endpoint payload.
 func NewGetPayload(name string) *user.GetPayload {
 	v := &user.GetPayload{}
@@ -110,6 +140,14 @@ func NewCreateUser(body *CreateRequestBody) *user.User {
 		Name: *body.Name,
 		Age:  *body.Age,
 	}
+
+	return v
+}
+
+// NewDeletePayload builds a user service delete endpoint payload.
+func NewDeletePayload(name string) *user.DeletePayload {
+	v := &user.DeletePayload{}
+	v.Name = name
 
 	return v
 }

@@ -50,6 +50,18 @@ type CreateInternalServerErrorResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// DeleteBadRequestResponseBody is the type of the "user" service "delete"
+// endpoint HTTP response body for the "BadRequest" error.
+type DeleteBadRequestResponseBody struct {
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// DeleteInternalServerErrorResponseBody is the type of the "user" service
+// "delete" endpoint HTTP response body for the "InternalServerError" error.
+type DeleteInternalServerErrorResponseBody struct {
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // NewCreateRequestBody builds the HTTP request body from the payload of the
 // "create" endpoint of the "user" service.
 func NewCreateRequestBody(p *user.User) *CreateRequestBody {
@@ -109,6 +121,25 @@ func NewCreateInternalServerError(body *CreateInternalServerErrorResponseBody) *
 	return v
 }
 
+// NewDeleteBadRequest builds a user service delete endpoint BadRequest error.
+func NewDeleteBadRequest(body *DeleteBadRequestResponseBody) *user.GoaError {
+	v := &user.GoaError{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewDeleteInternalServerError builds a user service delete endpoint
+// InternalServerError error.
+func NewDeleteInternalServerError(body *DeleteInternalServerErrorResponseBody) *user.GoaError {
+	v := &user.GoaError{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
 // ValidateGetResponseBody runs the validations defined on GetResponseBody
 func ValidateGetResponseBody(body *GetResponseBody) (err error) {
 	if body.Name == nil {
@@ -150,6 +181,24 @@ func ValidateCreateBadRequestResponseBody(body *CreateBadRequestResponseBody) (e
 // ValidateCreateInternalServerErrorResponseBody runs the validations defined
 // on create_InternalServerError_response_body
 func ValidateCreateInternalServerErrorResponseBody(body *CreateInternalServerErrorResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteBadRequestResponseBody runs the validations defined on
+// delete_BadRequest_response_body
+func ValidateDeleteBadRequestResponseBody(body *DeleteBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateDeleteInternalServerErrorResponseBody runs the validations defined
+// on delete_InternalServerError_response_body
+func ValidateDeleteInternalServerErrorResponseBody(body *DeleteInternalServerErrorResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

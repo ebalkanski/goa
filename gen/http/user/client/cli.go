@@ -44,3 +44,16 @@ func BuildCreatePayload(userCreateBody string) (*user.User, error) {
 
 	return v, nil
 }
+
+// BuildDeletePayload builds the payload for the user delete endpoint from CLI
+// flags.
+func BuildDeletePayload(userDeleteName string) (*user.DeletePayload, error) {
+	var name string
+	{
+		name = userDeleteName
+	}
+	v := &user.DeletePayload{}
+	v.Name = name
+
+	return v, nil
+}

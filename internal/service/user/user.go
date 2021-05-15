@@ -12,18 +12,19 @@ import (
 var UserNotFound = errors.New("user is not found")
 var UserExists = errors.New("such user already exists")
 
-type userStorage interface {
+type UserStorage interface {
 	User(ctx context.Context, name string) (*goauser.User, error)
 	CreateUser(ctx context.Context, u *goauser.User) error
+	Delete(ctx context.Context, name string) error
 }
 
 type user struct {
 	logger  *log.Logger
-	storage userStorage
+	storage UserStorage
 }
 
 // NewUser returns the user service implementation.
-func NewUser(logger *log.Logger, storage userStorage) goauser.Service {
+func NewUser(logger *log.Logger, storage UserStorage) goauser.Service {
 	return &user{
 		logger,
 		storage,
@@ -51,6 +52,19 @@ func (s *user) Create(ctx context.Context, u *goauser.User) (err error) {
 			return goa_errors.NewBadRequestError(err)
 		}
 		return goa_errors.NewBadRequestError(errors.New("user cannot be created"))
+	}
+
+	return nil
+}
+
+// Delete deletes a user
+func (s *user) Delete(ctx context.Context, p *goauser.DeletePayload) (err error) {
+	if err := s.storage.Delete(ctx, p.Name); err != nil {
+		if err == UserNotFound {
+			return goa_errors.NewBadRequestError(err)
+		}
+
+		return goa_errors.NewInternalServerError(err)
 	}
 
 	return nil

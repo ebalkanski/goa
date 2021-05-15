@@ -51,6 +51,7 @@ paths:
       tags:
       - user
       summary: get user
+      description: Fetch user.
       operationId: user#get
       parameters:
       - name: name
@@ -75,6 +76,34 @@ paths:
           description: Internal Server Error response.
           schema:
             $ref: '#/definitions/UserGetInternalServerErrorResponseBody'
+            required:
+            - message
+      schemes:
+      - http
+    delete:
+      tags:
+      - user
+      summary: delete user
+      description: Delete user.
+      operationId: user#delete
+      parameters:
+      - name: name
+        in: path
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content response.
+        "400":
+          description: Bad Request response.
+          schema:
+            $ref: '#/definitions/UserDeleteBadRequestResponseBody'
+            required:
+            - message
+        "500":
+          description: Internal Server Error response.
+          schema:
+            $ref: '#/definitions/UserDeleteInternalServerErrorResponseBody'
             required:
             - message
       schemes:
@@ -119,6 +148,28 @@ definitions:
     required:
     - name
     - age
+  UserDeleteBadRequestResponseBody:
+    title: UserDeleteBadRequestResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
+  UserDeleteInternalServerErrorResponseBody:
+    title: UserDeleteInternalServerErrorResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
   UserGetBadRequestResponseBody:
     title: UserGetBadRequestResponseBody
     type: object

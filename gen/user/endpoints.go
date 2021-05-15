@@ -17,6 +17,7 @@ import (
 type Endpoints struct {
 	Get    goa.Endpoint
 	Create goa.Endpoint
+	Delete goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "user" service with endpoints.
@@ -24,6 +25,7 @@ func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
 		Get:    NewGetEndpoint(s),
 		Create: NewCreateEndpoint(s),
+		Delete: NewDeleteEndpoint(s),
 	}
 }
 
@@ -31,6 +33,7 @@ func NewEndpoints(s Service) *Endpoints {
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Get = m(e.Get)
 	e.Create = m(e.Create)
+	e.Delete = m(e.Delete)
 }
 
 // NewGetEndpoint returns an endpoint function that calls the method "get" of
@@ -48,5 +51,14 @@ func NewCreateEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
 		p := req.(*User)
 		return nil, s.Create(ctx, p)
+	}
+}
+
+// NewDeleteEndpoint returns an endpoint function that calls the method
+// "delete" of service "user".
+func NewDeleteEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*DeletePayload)
+		return nil, s.Delete(ctx, p)
 	}
 }

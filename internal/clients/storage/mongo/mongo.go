@@ -77,6 +77,22 @@ func (m mongoDB) CreateUser(ctx context.Context, u *goauser.User) error {
 	return nil
 }
 
+// Delete deletes a user
+func (m mongoDB) Delete(ctx context.Context, name string) error {
+	users := m.Database(m.db).Collection("users")
+	filter := bson.D{{"name", name}}
+
+	deleteResult, err := users.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+	if deleteResult.DeletedCount == 1 {
+		return nil
+	}
+
+	return user.UserNotFound
+}
+
 func (m mongoDB) userExists(ctx context.Context, u *goauser.User) (bool, error) {
 	users := m.Database(m.db).Collection("users")
 	filter := bson.D{{"name", u.Name}}
