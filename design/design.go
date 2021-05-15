@@ -36,11 +36,7 @@ var _ = Service("user", func() {
 
 	Method("create", func() {
 		Description("Create new user.")
-		Payload(User, func() {
-			Example(func() {
-				Value(Val{"name": "Bob", "age": 25})
-			})
-		})
+		Payload(User)
 		HTTP(func() {
 			POST("/user")
 			Response(StatusCreated, func() {

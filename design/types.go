@@ -6,7 +6,11 @@ import (
 
 var User = Type("User", func() {
 	Description("User representation")
-	Attribute("name", String)
-	Attribute("age", Int)
+	Attribute("name", String, func() {
+		Example("Bob")
+	})
+	Attribute("age", Int, func() {
+		Example(25)
+	})
 	Required("name", "age")
 })

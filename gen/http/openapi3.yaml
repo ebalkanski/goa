@@ -56,11 +56,11 @@ components:
       properties:
         age:
           type: integer
-          example: 112266298297454489
+          example: 25
           format: int64
         name:
           type: string
-          example: Sit incidunt occaecati omnis nam omnis suscipit.
+          example: Bob
       example:
         age: 25
         name: Bob

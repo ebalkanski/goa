@@ -62,11 +62,11 @@ definitions:
     properties:
       age:
         type: integer
-        example: 5501069298807053509
+        example: 25
         format: int64
       name:
         type: string
-        example: Sint est consectetur nihil.
+        example: Bob
     example:
       age: 25
       name: Bob
@@ -79,11 +79,11 @@ definitions:
     properties:
       age:
         type: integer
-        example: 2066121240725874602
+        example: 25
         format: int64
       name:
         type: string
-        example: Quia vel provident.
+        example: Bob
     example:
       age: 25
       name: Bob
