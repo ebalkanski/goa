@@ -2,12 +2,19 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
+
+	"github.com/ebalkanski/goa/internal/service/user"
+
+	"go.mongodb.org/mongo-driver/bson"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+
+	goauser "github.com/ebalkanski/goa/gen/user"
 )
 
 type mongoDB struct {
@@ -18,11 +25,7 @@ type mongoDB struct {
 
 // NewMongo returns new Mongo client
 func NewMongo(logger *log.Logger, ctx context.Context, uri string, db string) *mongoDB {
-	var cancel context.CancelFunc
-
-	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
-
+	ctx, _ = context.WithTimeout(ctx, 10*time.Second)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		logger.Fatal(err)
@@ -39,11 +42,57 @@ func NewMongo(logger *log.Logger, ctx context.Context, uri string, db string) *m
 }
 
 // User retrieves a user
-func (m mongoDB) User() {
-	m.logger.Println("implement me")
+func (m mongoDB) User(ctx context.Context, name string) (*goauser.User, error) {
+	users := m.Database(m.db).Collection("users")
+	filter := bson.D{{"name", name}}
+
+	var u goauser.User
+	if err := users.FindOne(ctx, filter).Decode(&u); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, user.UserNotFound
+		}
+
+		m.logger.Printf("cannot get user from db: %s\n", err.Error())
+		return nil, err
+	}
+
+	return &u, nil
 }
 
 // CreateUser creates a user
-func (m mongoDB) CreateUser() {
-	m.logger.Println("implement me")
+func (m mongoDB) CreateUser(ctx context.Context, u *goauser.User) error {
+	ok, err := m.userExists(ctx, u)
+
+	if err != nil {
+		return err
+	}
+	if ok {
+		return fmt.Errorf("user with name %s already exists", u.Name)
+	}
+
+	users := m.Database(m.db).Collection("users")
+	_, err = users.InsertOne(ctx, u)
+	if err != nil {
+		m.logger.Printf("cannot insert user into db: %s\n", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (m mongoDB) userExists(ctx context.Context, u *goauser.User) (bool, error) {
+	users := m.Database(m.db).Collection("users")
+	filter := bson.D{{"name", u.Name}}
+
+	var user goauser.User
+	if err := users.FindOne(ctx, filter).Decode(&user); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false, nil
+		}
+
+		m.logger.Printf("cannot get user from db: %s\n", err.Error())
+		return false, err
+	}
+
+	return true, nil
 }
