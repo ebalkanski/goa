@@ -9,10 +9,12 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/kelseyhightower/envconfig"
+
 	goauser "github.com/ebalkanski/goa/gen/user"
 	storage "github.com/ebalkanski/goa/internal/clients/storage/mongo"
+	"github.com/ebalkanski/goa/internal/clients/storage/mongo_repo"
 	"github.com/ebalkanski/goa/internal/service/user"
-	"github.com/kelseyhightower/envconfig"
 )
 
 func main() {
@@ -34,15 +36,18 @@ func main() {
 	}
 
 	// Init Mongo client
-	mongoDB := storage.NewMongo(logger, ctx, cfg.Mongo.URI, cfg.Mongo.DB)
+	mongoDB := storage.NewMongo(logger, ctx, cfg.Mongo.URI)
 	defer mongoDB.Disconnect(ctx)
+
+	// Create repositories
+	userRepo := mongo_repo.NewUserRepo(logger, mongoDB, cfg.Mongo.DB)
 
 	// Initialize the services.
 	var (
 		userSvc goauser.Service
 	)
 	{
-		userSvc = user.NewUser(logger, mongoDB)
+		userSvc = user.NewUser(logger, userRepo)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
