@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"errors"
-	"log"
 
 	goauser "github.com/ebalkanski/goa/gen/user"
 	"github.com/ebalkanski/goa/internal/service/goa_errors"
@@ -22,14 +21,12 @@ type UserRepo interface {
 }
 
 type User struct {
-	logger *log.Logger
-	repo   UserRepo
+	repo UserRepo
 }
 
 // NewUser returns the user service implementation.
-func NewUser(logger *log.Logger, repo UserRepo) goauser.Service {
+func NewUser(repo UserRepo) goauser.Service {
 	return &User{
-		logger,
 		repo,
 	}
 }

@@ -47,7 +47,7 @@ func main() {
 		userSvc goauser.Service
 	)
 	{
-		userSvc = user.NewUser(logger, userRepo)
+		userSvc = user.NewUser(userRepo)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services
