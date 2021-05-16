@@ -5,8 +5,6 @@ type config struct {
 }
 
 type mongoConfig struct {
-	URI  string `required:"true"`
-	User string `required:"true"`
-	Pass string `required:"true"`
-	DB   string `required:"true"`
+	URI string `required:"true"`
+	DB  string `required:"true"`
 }
