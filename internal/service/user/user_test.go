@@ -3,6 +3,7 @@ package user_test
 import (
 	"context"
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -103,6 +104,82 @@ func TestFetch(t *testing.T) {
 
 			svc := user.NewUser(repo)
 			res, err := svc.Fetch(context.Background(), test.payload)
+
+			assert.Equal(t, test.res, res)
+			assert.Nil(t, err)
+		})
+	}
+}
+
+func TestFetchAllFails(t *testing.T) {
+	tests := []struct {
+		name      string
+		usersStub func(context.Context) ([]*goauser.User, error)
+
+		err error
+	}{
+		{
+			name: "cannot get users from repo",
+			usersStub: func(ctx context.Context) ([]*goauser.User, error) {
+				return nil, errors.New("ERROR")
+			},
+
+			err: errors.New("cannot get users"),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repo := &userfakes.FakeUserRepo{}
+			repo.UsersStub = test.usersStub
+
+			svc := user.NewUser(repo)
+			res, err := svc.FetchAll(context.Background())
+
+			assert.Nil(t, res)
+			assert.IsType(t, &goa_errors.Error{}, err)
+			gerr, ok := err.(*goa_errors.Error)
+			assert.True(t, ok)
+			assert.Equal(t, test.err.Error(), gerr.Message)
+			assert.Equal(t, http.StatusInternalServerError, gerr.StatusCode())
+		})
+	}
+}
+
+func TestFetchAll(t *testing.T) {
+	tests := []struct {
+		name      string
+		usersStub func(context.Context) ([]*goauser.User, error)
+
+		res *goauser.Users
+	}{
+		{
+			name: "get users from repo",
+			usersStub: func(ctx context.Context) ([]*goauser.User, error) {
+				return []*goauser.User{
+					{
+						Name: "Bob",
+						Age:  22,
+					},
+				}, nil
+			},
+
+			res: &goauser.Users{
+				Users: []*goauser.User{
+					{
+						Name: "Bob",
+						Age:  22,
+					},
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repo := &userfakes.FakeUserRepo{}
+			repo.UsersStub = test.usersStub
+
+			svc := user.NewUser(repo)
+			res, err := svc.FetchAll(context.Background())
 
 			assert.Equal(t, test.res, res)
 			assert.Nil(t, err)
