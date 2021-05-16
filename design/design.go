@@ -1,7 +1,6 @@
 package design
 
 import (
-	"github.com/ebalkanski/goa/gen/user"
 	. "goa.design/goa/v3/dsl"
 )
 
@@ -29,11 +28,7 @@ var _ = Service("user", func() {
 			})
 			Required("name")
 		})
-		Result(User, func() {
-			Example(func() {
-				Value(Val{"name": "Bob", "age": 25})
-			})
-		})
+		Result(User)
 		HTTP(func() {
 			GET("/user/{name}")
 			Response(StatusOK)
@@ -45,14 +40,15 @@ var _ = Service("user", func() {
 	Method("fetchAll", func() {
 		Description("Fetch all users.")
 		Meta("swagger:summary", "")
-		Result(func() {
-			Attribute("users", ArrayOf(User), func() {
-				Example([]user.User{
-					{Name: "Bob", Age: 25},
-					{Name: "John", Age: 33},
-				})
-			})
-		})
+		//Result(func() {
+		//	Attribute("users", ArrayOf(User), func() {
+		//		Example([]user.User{
+		//			{Name: "Bob", Age: 25},
+		//			{Name: "John", Age: 33},
+		//		})
+		//	})
+		//})
+		Result(Users)
 		HTTP(func() {
 			GET("/users")
 			Response(StatusOK)

@@ -157,7 +157,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FetchAllResponseBody'
+                $ref: '#/components/schemas/Users'
               example:
                 users:
                 - name: Bob
@@ -174,24 +174,6 @@ paths:
                 message: error
 components:
   schemas:
-    FetchAllResponseBody:
-      type: object
-      properties:
-        users:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-          example:
-          - name: Bob
-            age: 25
-          - name: John
-            age: 33
-      example:
-        users:
-        - name: Bob
-          age: 25
-        - name: John
-          age: 33
     GoaError:
       type: object
       properties:
@@ -218,3 +200,21 @@ components:
       required:
       - name
       - age
+    Users:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          example:
+          - name: Bob
+            age: 25
+          - name: John
+            age: 33
+      example:
+        users:
+        - name: Bob
+          age: 25
+        - name: John
+          age: 33

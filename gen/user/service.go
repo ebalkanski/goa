@@ -16,7 +16,7 @@ type Service interface {
 	// Fetch user.
 	Fetch(context.Context, *FetchPayload) (res *User, err error)
 	// Fetch all users.
-	FetchAll(context.Context) (res *FetchAllResult, err error)
+	FetchAll(context.Context) (res *Users, err error)
 	// Create new user.
 	Create(context.Context, *User) (err error)
 	// Edit user.
@@ -46,8 +46,8 @@ type User struct {
 	Age  int
 }
 
-// FetchAllResult is the result type of the user service fetchAll method.
-type FetchAllResult struct {
+// Users is the result type of the user service fetchAll method.
+type Users struct {
 	Users []*User
 }
 

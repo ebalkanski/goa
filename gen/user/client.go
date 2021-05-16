@@ -44,13 +44,13 @@ func (c *Client) Fetch(ctx context.Context, p *FetchPayload) (res *User, err err
 }
 
 // FetchAll calls the "fetchAll" endpoint of the "user" service.
-func (c *Client) FetchAll(ctx context.Context) (res *FetchAllResult, err error) {
+func (c *Client) FetchAll(ctx context.Context) (res *Users, err error) {
 	var ires interface{}
 	ires, err = c.FetchAllEndpoint(ctx, nil)
 	if err != nil {
 		return
 	}
-	return ires.(*FetchAllResult), nil
+	return ires.(*Users), nil
 }
 
 // Create calls the "create" endpoint of the "user" service.

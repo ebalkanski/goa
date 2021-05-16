@@ -111,7 +111,7 @@ func NewFetchResponseBody(res *user.User) *FetchResponseBody {
 
 // NewFetchAllResponseBody builds the HTTP response body from the result of the
 // "fetchAll" endpoint of the "user" service.
-func NewFetchAllResponseBody(res *user.FetchAllResult) *FetchAllResponseBody {
+func NewFetchAllResponseBody(res *user.Users) *FetchAllResponseBody {
 	body := &FetchAllResponseBody{}
 	if res.Users != nil {
 		body.Users = make([]*UserResponseBody, len(res.Users))

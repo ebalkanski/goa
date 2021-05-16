@@ -164,7 +164,7 @@ func DecodeFetchAllResponse(decoder func(*http.Response) goahttp.Decoder, restor
 			if err != nil {
 				return nil, goahttp.ErrValidationError("user", "fetchAll", err)
 			}
-			res := NewFetchAllResultOK(&body)
+			res := NewFetchAllUsersOK(&body)
 			return res, nil
 		case http.StatusInternalServerError:
 			var (

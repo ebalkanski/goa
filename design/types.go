@@ -1,6 +1,7 @@
 package design
 
 import (
+	goauser "github.com/ebalkanski/goa/gen/user"
 	. "goa.design/goa/v3/dsl"
 )
 
@@ -13,6 +14,15 @@ var User = Type("User", func() {
 		Example(25)
 	})
 	Required("name", "age")
+})
+
+var Users = Type("Users", func() {
+	Attribute("users", ArrayOf(User), func() {
+		Example([]goauser.User{
+			{Name: "Bob", Age: 25},
+			{Name: "John", Age: 33},
+		})
+	})
 })
 
 var GoaError = Type("GoaError", func() {

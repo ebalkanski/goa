@@ -149,10 +149,10 @@ func NewFetchInternalServerError(body *FetchInternalServerErrorResponseBody) *us
 	return v
 }
 
-// NewFetchAllResultOK builds a "user" service "fetchAll" endpoint result from
-// a HTTP "OK" response.
-func NewFetchAllResultOK(body *FetchAllResponseBody) *user.FetchAllResult {
-	v := &user.FetchAllResult{}
+// NewFetchAllUsersOK builds a "user" service "fetchAll" endpoint result from a
+// HTTP "OK" response.
+func NewFetchAllUsersOK(body *FetchAllResponseBody) *user.Users {
+	v := &user.Users{}
 	if body.Users != nil {
 		v.Users = make([]*user.User, len(body.Users))
 		for i, val := range body.Users {

@@ -48,13 +48,13 @@ func (svc *user) Fetch(ctx context.Context, p *goauser.FetchPayload) (res *goaus
 }
 
 // FetchAll returns all Users info
-func (svc *user) FetchAll(ctx context.Context) (res *goauser.FetchAllResult, err error) {
+func (svc *user) FetchAll(ctx context.Context) (res *goauser.Users, err error) {
 	users, err := svc.repo.Users(ctx)
 	if err != nil {
 		return nil, goa_errors.NewInternalServerError(errors.New("cannot get users"))
 	}
 
-	return &goauser.FetchAllResult{Users: users}, nil
+	return &goauser.Users{Users: users}, nil
 }
 
 // Create creates a new user

@@ -89,7 +89,7 @@ func EncodeFetchError(encoder func(context.Context, http.ResponseWriter) goahttp
 // fetchAll endpoint.
 func EncodeFetchAllResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
-		res := v.(*user.FetchAllResult)
+		res := v.(*user.Users)
 		enc := encoder(ctx, w)
 		body := NewFetchAllResponseBody(res)
 		w.WriteHeader(http.StatusOK)
