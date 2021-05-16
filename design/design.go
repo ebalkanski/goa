@@ -4,7 +4,6 @@ import (
 	. "goa.design/goa/v3/dsl"
 )
 
-// API describes the global properties of the API server.
 var _ = API("play", func() {
 	Title("Play with goa")
 	Description("HTTP service for playing with goa")
@@ -40,14 +39,6 @@ var _ = Service("user", func() {
 	Method("fetchAll", func() {
 		Description("Fetch all users.")
 		Meta("swagger:summary", "")
-		//Result(func() {
-		//	Attribute("users", ArrayOf(User), func() {
-		//		Example([]user.User{
-		//			{Name: "Bob", Age: 25},
-		//			{Name: "John", Age: 33},
-		//		})
-		//	})
-		//})
 		Result(Users)
 		HTTP(func() {
 			GET("/users")
