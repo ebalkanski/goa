@@ -12,6 +12,7 @@ import (
 var UserNotFound = errors.New("user is not found")
 var UserExists = errors.New("such user already exists")
 
+//go:generate counterfeiter . UserRepo
 type UserRepo interface {
 	User(ctx context.Context, name string) (*goauser.User, error)
 	Users(ctx context.Context) ([]*goauser.User, error)
