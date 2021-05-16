@@ -15,36 +15,47 @@ import (
 
 // Endpoints wraps the "user" service endpoints.
 type Endpoints struct {
-	Get    goa.Endpoint
-	Create goa.Endpoint
-	Edit   goa.Endpoint
-	Delete goa.Endpoint
+	Fetch    goa.Endpoint
+	FetchAll goa.Endpoint
+	Create   goa.Endpoint
+	Edit     goa.Endpoint
+	Delete   goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "user" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	return &Endpoints{
-		Get:    NewGetEndpoint(s),
-		Create: NewCreateEndpoint(s),
-		Edit:   NewEditEndpoint(s),
-		Delete: NewDeleteEndpoint(s),
+		Fetch:    NewFetchEndpoint(s),
+		FetchAll: NewFetchAllEndpoint(s),
+		Create:   NewCreateEndpoint(s),
+		Edit:     NewEditEndpoint(s),
+		Delete:   NewDeleteEndpoint(s),
 	}
 }
 
 // Use applies the given middleware to all the "user" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.Get = m(e.Get)
+	e.Fetch = m(e.Fetch)
+	e.FetchAll = m(e.FetchAll)
 	e.Create = m(e.Create)
 	e.Edit = m(e.Edit)
 	e.Delete = m(e.Delete)
 }
 
-// NewGetEndpoint returns an endpoint function that calls the method "get" of
-// service "user".
-func NewGetEndpoint(s Service) goa.Endpoint {
+// NewFetchEndpoint returns an endpoint function that calls the method "fetch"
+// of service "user".
+func NewFetchEndpoint(s Service) goa.Endpoint {
 	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*GetPayload)
-		return s.Get(ctx, p)
+		p := req.(*FetchPayload)
+		return s.Fetch(ctx, p)
+	}
+}
+
+// NewFetchAllEndpoint returns an endpoint function that calls the method
+// "fetchAll" of service "user".
+func NewFetchAllEndpoint(s Service) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		return s.FetchAll(ctx)
 	}
 }
 

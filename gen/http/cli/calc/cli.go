@@ -23,13 +23,13 @@ import (
 //    command (subcommand1|subcommand2|...)
 //
 func UsageCommands() string {
-	return `user (get|create|edit|delete)
+	return `user (fetch|fetch-all|create|edit|delete)
 `
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + ` user get --name "Bob"` + "\n" +
+	return os.Args[0] + ` user fetch --name "Bob"` + "\n" +
 		""
 }
 
@@ -45,8 +45,10 @@ func ParseEndpoint(
 	var (
 		userFlags = flag.NewFlagSet("user", flag.ContinueOnError)
 
-		userGetFlags    = flag.NewFlagSet("get", flag.ExitOnError)
-		userGetNameFlag = userGetFlags.String("name", "REQUIRED", "")
+		userFetchFlags    = flag.NewFlagSet("fetch", flag.ExitOnError)
+		userFetchNameFlag = userFetchFlags.String("name", "REQUIRED", "")
+
+		userFetchAllFlags = flag.NewFlagSet("fetch-all", flag.ExitOnError)
 
 		userCreateFlags    = flag.NewFlagSet("create", flag.ExitOnError)
 		userCreateBodyFlag = userCreateFlags.String("body", "REQUIRED", "")
@@ -58,7 +60,8 @@ func ParseEndpoint(
 		userDeleteNameFlag = userDeleteFlags.String("name", "REQUIRED", "")
 	)
 	userFlags.Usage = userUsage
-	userGetFlags.Usage = userGetUsage
+	userFetchFlags.Usage = userFetchUsage
+	userFetchAllFlags.Usage = userFetchAllUsage
 	userCreateFlags.Usage = userCreateUsage
 	userEditFlags.Usage = userEditUsage
 	userDeleteFlags.Usage = userDeleteUsage
@@ -97,8 +100,11 @@ func ParseEndpoint(
 		switch svcn {
 		case "user":
 			switch epn {
-			case "get":
-				epf = userGetFlags
+			case "fetch":
+				epf = userFetchFlags
+
+			case "fetch-all":
+				epf = userFetchAllFlags
 
 			case "create":
 				epf = userCreateFlags
@@ -134,9 +140,12 @@ func ParseEndpoint(
 		case "user":
 			c := userc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
-			case "get":
-				endpoint = c.Get()
-				data, err = userc.BuildGetPayload(*userGetNameFlag)
+			case "fetch":
+				endpoint = c.Fetch()
+				data, err = userc.BuildFetchPayload(*userFetchNameFlag)
+			case "fetch-all":
+				endpoint = c.FetchAll()
+				data = nil
 			case "create":
 				endpoint = c.Create()
 				data, err = userc.BuildCreatePayload(*userCreateBodyFlag)
@@ -163,7 +172,8 @@ Usage:
     %s [globalflags] user COMMAND [flags]
 
 COMMAND:
-    get: Fetch user.
+    fetch: Fetch user.
+    fetch-all: Fetch all users.
     create: Create new user.
     edit: Edit user.
     delete: Delete user.
@@ -172,14 +182,24 @@ Additional help:
     %s user COMMAND --help
 `, os.Args[0], os.Args[0])
 }
-func userGetUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] user get -name STRING
+func userFetchUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] user fetch -name STRING
 
 Fetch user.
     -name STRING: 
 
 Example:
-    `+os.Args[0]+` user get --name "Bob"
+    `+os.Args[0]+` user fetch --name "Bob"
+`, os.Args[0])
+}
+
+func userFetchAllUsage() {
+	fmt.Fprintf(os.Stderr, `%s [flags] user fetch-all
+
+Fetch all users.
+
+Example:
+    `+os.Args[0]+` user fetch-all
 `, os.Args[0])
 }
 

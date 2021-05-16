@@ -17,7 +17,6 @@ paths:
     put:
       tags:
       - user
-      summary: edit user
       description: Edit user.
       operationId: user#edit
       parameters:
@@ -49,7 +48,6 @@ paths:
     post:
       tags:
       - user
-      summary: create user
       description: Create new user.
       operationId: user#create
       parameters:
@@ -82,9 +80,8 @@ paths:
     get:
       tags:
       - user
-      summary: get user
       description: Fetch user.
-      operationId: user#get
+      operationId: user#fetch
       parameters:
       - name: name
         in: path
@@ -94,20 +91,20 @@ paths:
         "200":
           description: OK response.
           schema:
-            $ref: '#/definitions/UserGetResponseBody'
+            $ref: '#/definitions/UserFetchResponseBody'
             required:
             - name
             - age
         "400":
           description: Bad Request response.
           schema:
-            $ref: '#/definitions/UserGetBadRequestResponseBody'
+            $ref: '#/definitions/UserFetchBadRequestResponseBody'
             required:
             - message
         "500":
           description: Internal Server Error response.
           schema:
-            $ref: '#/definitions/UserGetInternalServerErrorResponseBody'
+            $ref: '#/definitions/UserFetchInternalServerErrorResponseBody'
             required:
             - message
       schemes:
@@ -115,7 +112,6 @@ paths:
     delete:
       tags:
       - user
-      summary: delete user
       description: Delete user.
       operationId: user#delete
       parameters:
@@ -136,6 +132,25 @@ paths:
           description: Internal Server Error response.
           schema:
             $ref: '#/definitions/UserDeleteInternalServerErrorResponseBody'
+            required:
+            - message
+      schemes:
+      - http
+  /users:
+    get:
+      tags:
+      - user
+      description: Fetch all users.
+      operationId: user#fetchAll
+      responses:
+        "200":
+          description: OK response.
+          schema:
+            $ref: '#/definitions/UserFetchAllResponseBody'
+        "500":
+          description: Internal Server Error response.
+          schema:
+            $ref: '#/definitions/UserFetchAllInternalServerErrorResponseBody'
             required:
             - message
       schemes:
@@ -241,8 +256,8 @@ definitions:
     required:
     - name
     - age
-  UserGetBadRequestResponseBody:
-    title: UserGetBadRequestResponseBody
+  UserFetchAllInternalServerErrorResponseBody:
+    title: UserFetchAllInternalServerErrorResponseBody
     type: object
     properties:
       message:
@@ -252,8 +267,27 @@ definitions:
       message: error
     required:
     - message
-  UserGetInternalServerErrorResponseBody:
-    title: UserGetInternalServerErrorResponseBody
+  UserFetchAllResponseBody:
+    title: UserFetchAllResponseBody
+    type: object
+    properties:
+      users:
+        type: array
+        items:
+          $ref: '#/definitions/UserResponseBody'
+        example:
+        - name: Bob
+          age: 25
+        - name: John
+          age: 33
+    example:
+      users:
+      - name: Bob
+        age: 25
+      - name: John
+        age: 33
+  UserFetchBadRequestResponseBody:
+    title: UserFetchBadRequestResponseBody
     type: object
     properties:
       message:
@@ -263,8 +297,19 @@ definitions:
       message: error
     required:
     - message
-  UserGetResponseBody:
-    title: UserGetResponseBody
+  UserFetchInternalServerErrorResponseBody:
+    title: UserFetchInternalServerErrorResponseBody
+    type: object
+    properties:
+      message:
+        type: string
+        example: error
+    example:
+      message: error
+    required:
+    - message
+  UserFetchResponseBody:
+    title: UserFetchResponseBody
     type: object
     properties:
       age:
@@ -274,6 +319,24 @@ definitions:
       name:
         type: string
         example: Bob
+    example:
+      age: 25
+      name: Bob
+    required:
+    - name
+    - age
+  UserResponseBody:
+    title: UserResponseBody
+    type: object
+    properties:
+      age:
+        type: integer
+        example: 25
+        format: int64
+      name:
+        type: string
+        example: Bob
+    description: User representation
     example:
       age: 25
       name: Bob

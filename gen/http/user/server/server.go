@@ -18,11 +18,12 @@ import (
 
 // Server lists the user service endpoint HTTP handlers.
 type Server struct {
-	Mounts []*MountPoint
-	Get    http.Handler
-	Create http.Handler
-	Edit   http.Handler
-	Delete http.Handler
+	Mounts   []*MountPoint
+	Fetch    http.Handler
+	FetchAll http.Handler
+	Create   http.Handler
+	Edit     http.Handler
+	Delete   http.Handler
 }
 
 // ErrorNamer is an interface implemented by generated error structs that
@@ -58,15 +59,17 @@ func New(
 ) *Server {
 	return &Server{
 		Mounts: []*MountPoint{
-			{"Get", "GET", "/user/{name}"},
+			{"Fetch", "GET", "/user/{name}"},
+			{"FetchAll", "GET", "/users"},
 			{"Create", "POST", "/user"},
 			{"Edit", "PUT", "/user"},
 			{"Delete", "DELETE", "/user/{name}"},
 		},
-		Get:    NewGetHandler(e.Get, mux, decoder, encoder, errhandler, formatter),
-		Create: NewCreateHandler(e.Create, mux, decoder, encoder, errhandler, formatter),
-		Edit:   NewEditHandler(e.Edit, mux, decoder, encoder, errhandler, formatter),
-		Delete: NewDeleteHandler(e.Delete, mux, decoder, encoder, errhandler, formatter),
+		Fetch:    NewFetchHandler(e.Fetch, mux, decoder, encoder, errhandler, formatter),
+		FetchAll: NewFetchAllHandler(e.FetchAll, mux, decoder, encoder, errhandler, formatter),
+		Create:   NewCreateHandler(e.Create, mux, decoder, encoder, errhandler, formatter),
+		Edit:     NewEditHandler(e.Edit, mux, decoder, encoder, errhandler, formatter),
+		Delete:   NewDeleteHandler(e.Delete, mux, decoder, encoder, errhandler, formatter),
 	}
 }
 
@@ -75,7 +78,8 @@ func (s *Server) Service() string { return "user" }
 
 // Use wraps the server handlers with the given middleware.
 func (s *Server) Use(m func(http.Handler) http.Handler) {
-	s.Get = m(s.Get)
+	s.Fetch = m(s.Fetch)
+	s.FetchAll = m(s.FetchAll)
 	s.Create = m(s.Create)
 	s.Edit = m(s.Edit)
 	s.Delete = m(s.Delete)
@@ -83,15 +87,16 @@ func (s *Server) Use(m func(http.Handler) http.Handler) {
 
 // Mount configures the mux to serve the user endpoints.
 func Mount(mux goahttp.Muxer, h *Server) {
-	MountGetHandler(mux, h.Get)
+	MountFetchHandler(mux, h.Fetch)
+	MountFetchAllHandler(mux, h.FetchAll)
 	MountCreateHandler(mux, h.Create)
 	MountEditHandler(mux, h.Edit)
 	MountDeleteHandler(mux, h.Delete)
 }
 
-// MountGetHandler configures the mux to serve the "user" service "get"
+// MountFetchHandler configures the mux to serve the "user" service "fetch"
 // endpoint.
-func MountGetHandler(mux goahttp.Muxer, h http.Handler) {
+func MountFetchHandler(mux goahttp.Muxer, h http.Handler) {
 	f, ok := h.(http.HandlerFunc)
 	if !ok {
 		f = func(w http.ResponseWriter, r *http.Request) {
@@ -101,9 +106,9 @@ func MountGetHandler(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("GET", "/user/{name}", f)
 }
 
-// NewGetHandler creates a HTTP handler which loads the HTTP request and calls
-// the "user" service "get" endpoint.
-func NewGetHandler(
+// NewFetchHandler creates a HTTP handler which loads the HTTP request and
+// calls the "user" service "fetch" endpoint.
+func NewFetchHandler(
 	endpoint goa.Endpoint,
 	mux goahttp.Muxer,
 	decoder func(*http.Request) goahttp.Decoder,
@@ -112,13 +117,13 @@ func NewGetHandler(
 	formatter func(err error) goahttp.Statuser,
 ) http.Handler {
 	var (
-		decodeRequest  = DecodeGetRequest(mux, decoder)
-		encodeResponse = EncodeGetResponse(encoder)
-		encodeError    = EncodeGetError(encoder, formatter)
+		decodeRequest  = DecodeFetchRequest(mux, decoder)
+		encodeResponse = EncodeFetchResponse(encoder)
+		encodeError    = EncodeFetchError(encoder, formatter)
 	)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
-		ctx = context.WithValue(ctx, goa.MethodKey, "get")
+		ctx = context.WithValue(ctx, goa.MethodKey, "fetch")
 		ctx = context.WithValue(ctx, goa.ServiceKey, "user")
 		payload, err := decodeRequest(r)
 		if err != nil {
@@ -128,6 +133,50 @@ func NewGetHandler(
 			return
 		}
 		res, err := endpoint(ctx, payload)
+		if err != nil {
+			if err := encodeError(ctx, w, err); err != nil {
+				errhandler(ctx, w, err)
+			}
+			return
+		}
+		if err := encodeResponse(ctx, w, res); err != nil {
+			errhandler(ctx, w, err)
+		}
+	})
+}
+
+// MountFetchAllHandler configures the mux to serve the "user" service
+// "fetchAll" endpoint.
+func MountFetchAllHandler(mux goahttp.Muxer, h http.Handler) {
+	f, ok := h.(http.HandlerFunc)
+	if !ok {
+		f = func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+		}
+	}
+	mux.Handle("GET", "/users", f)
+}
+
+// NewFetchAllHandler creates a HTTP handler which loads the HTTP request and
+// calls the "user" service "fetchAll" endpoint.
+func NewFetchAllHandler(
+	endpoint goa.Endpoint,
+	mux goahttp.Muxer,
+	decoder func(*http.Request) goahttp.Decoder,
+	encoder func(context.Context, http.ResponseWriter) goahttp.Encoder,
+	errhandler func(context.Context, http.ResponseWriter, error),
+	formatter func(err error) goahttp.Statuser,
+) http.Handler {
+	var (
+		encodeResponse = EncodeFetchAllResponse(encoder)
+		encodeError    = EncodeFetchAllError(encoder, formatter)
+	)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), goahttp.AcceptTypeKey, r.Header.Get("Accept"))
+		ctx = context.WithValue(ctx, goa.MethodKey, "fetchAll")
+		ctx = context.WithValue(ctx, goa.ServiceKey, "user")
+		var err error
+		res, err := endpoint(ctx, nil)
 		if err != nil {
 			if err := encodeError(ctx, w, err); err != nil {
 				errhandler(ctx, w, err)

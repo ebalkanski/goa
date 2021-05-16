@@ -17,8 +17,12 @@ import (
 
 // Client lists the user service endpoint HTTP clients.
 type Client struct {
-	// Get Doer is the HTTP client used to make requests to the get endpoint.
-	GetDoer goahttp.Doer
+	// Fetch Doer is the HTTP client used to make requests to the fetch endpoint.
+	FetchDoer goahttp.Doer
+
+	// FetchAll Doer is the HTTP client used to make requests to the fetchAll
+	// endpoint.
+	FetchAllDoer goahttp.Doer
 
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
@@ -49,7 +53,8 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		GetDoer:             doer,
+		FetchDoer:           doer,
+		FetchAllDoer:        doer,
 		CreateDoer:          doer,
 		EditDoer:            doer,
 		DeleteDoer:          doer,
@@ -61,20 +66,39 @@ func NewClient(
 	}
 }
 
-// Get returns an endpoint that makes HTTP requests to the user service get
+// Fetch returns an endpoint that makes HTTP requests to the user service fetch
 // server.
-func (c *Client) Get() goa.Endpoint {
+func (c *Client) Fetch() goa.Endpoint {
 	var (
-		decodeResponse = DecodeGetResponse(c.decoder, c.RestoreResponseBody)
+		decodeResponse = DecodeFetchResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildGetRequest(ctx, v)
+		req, err := c.BuildFetchRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.GetDoer.Do(req)
+		resp, err := c.FetchDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("user", "get", err)
+			return nil, goahttp.ErrRequestError("user", "fetch", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// FetchAll returns an endpoint that makes HTTP requests to the user service
+// fetchAll server.
+func (c *Client) FetchAll() goa.Endpoint {
+	var (
+		decodeResponse = DecodeFetchAllResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildFetchAllRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.FetchAllDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("user", "fetchAll", err)
 		}
 		return decodeResponse(resp)
 	}

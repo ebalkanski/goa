@@ -18,23 +18,23 @@ import (
 	goahttp "goa.design/goa/v3/http"
 )
 
-// BuildGetRequest instantiates a HTTP request object with method and path set
-// to call the "user" service "get" endpoint
-func (c *Client) BuildGetRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+// BuildFetchRequest instantiates a HTTP request object with method and path
+// set to call the "user" service "fetch" endpoint
+func (c *Client) BuildFetchRequest(ctx context.Context, v interface{}) (*http.Request, error) {
 	var (
 		name string
 	)
 	{
-		p, ok := v.(*user.GetPayload)
+		p, ok := v.(*user.FetchPayload)
 		if !ok {
-			return nil, goahttp.ErrInvalidType("user", "get", "*user.GetPayload", v)
+			return nil, goahttp.ErrInvalidType("user", "fetch", "*user.FetchPayload", v)
 		}
 		name = p.Name
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: GetUserPath(name)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: FetchUserPath(name)}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("user", "get", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("user", "fetch", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -43,14 +43,14 @@ func (c *Client) BuildGetRequest(ctx context.Context, v interface{}) (*http.Requ
 	return req, nil
 }
 
-// DecodeGetResponse returns a decoder for responses returned by the user get
-// endpoint. restoreBody controls whether the response body should be restored
-// after having been read.
-// DecodeGetResponse may return the following errors:
+// DecodeFetchResponse returns a decoder for responses returned by the user
+// fetch endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeFetchResponse may return the following errors:
 //	- "BadRequest" (type *user.GoaError): http.StatusBadRequest
 //	- "InternalServerError" (type *user.GoaError): http.StatusInternalServerError
 //	- error: internal error
-func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+func DecodeFetchResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
 			b, err := ioutil.ReadAll(resp.Body)
@@ -67,50 +67,122 @@ func DecodeGetResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body GetResponseBody
+				body FetchResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("user", "get", err)
+				return nil, goahttp.ErrDecodingError("user", "fetch", err)
 			}
-			err = ValidateGetResponseBody(&body)
+			err = ValidateFetchResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("user", "get", err)
+				return nil, goahttp.ErrValidationError("user", "fetch", err)
 			}
-			res := NewGetUserOK(&body)
+			res := NewFetchUserOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
-				body GetBadRequestResponseBody
+				body FetchBadRequestResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("user", "get", err)
+				return nil, goahttp.ErrDecodingError("user", "fetch", err)
 			}
-			err = ValidateGetBadRequestResponseBody(&body)
+			err = ValidateFetchBadRequestResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("user", "get", err)
+				return nil, goahttp.ErrValidationError("user", "fetch", err)
 			}
-			return nil, NewGetBadRequest(&body)
+			return nil, NewFetchBadRequest(&body)
 		case http.StatusInternalServerError:
 			var (
-				body GetInternalServerErrorResponseBody
+				body FetchInternalServerErrorResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("user", "get", err)
+				return nil, goahttp.ErrDecodingError("user", "fetch", err)
 			}
-			err = ValidateGetInternalServerErrorResponseBody(&body)
+			err = ValidateFetchInternalServerErrorResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("user", "get", err)
+				return nil, goahttp.ErrValidationError("user", "fetch", err)
 			}
-			return nil, NewGetInternalServerError(&body)
+			return nil, NewFetchInternalServerError(&body)
 		default:
 			body, _ := ioutil.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("user", "get", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("user", "fetch", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildFetchAllRequest instantiates a HTTP request object with method and path
+// set to call the "user" service "fetchAll" endpoint
+func (c *Client) BuildFetchAllRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: FetchAllUserPath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("user", "fetchAll", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// DecodeFetchAllResponse returns a decoder for responses returned by the user
+// fetchAll endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeFetchAllResponse may return the following errors:
+//	- "InternalServerError" (type *user.GoaError): http.StatusInternalServerError
+//	- error: internal error
+func DecodeFetchAllResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body FetchAllResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("user", "fetchAll", err)
+			}
+			err = ValidateFetchAllResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("user", "fetchAll", err)
+			}
+			res := NewFetchAllResultOK(&body)
+			return res, nil
+		case http.StatusInternalServerError:
+			var (
+				body FetchAllInternalServerErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("user", "fetchAll", err)
+			}
+			err = ValidateFetchAllInternalServerErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("user", "fetchAll", err)
+			}
+			return nil, NewFetchAllInternalServerError(&body)
+		default:
+			body, _ := ioutil.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("user", "fetchAll", resp.StatusCode, string(body))
 		}
 	}
 }
@@ -377,4 +449,18 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			return nil, goahttp.ErrInvalidResponse("user", "delete", resp.StatusCode, string(body))
 		}
 	}
+}
+
+// unmarshalUserResponseBodyToUserUser builds a value of type *user.User from a
+// value of type *UserResponseBody.
+func unmarshalUserResponseBodyToUserUser(v *UserResponseBody) *user.User {
+	if v == nil {
+		return nil
+	}
+	res := &user.User{
+		Name: *v.Name,
+		Age:  *v.Age,
+	}
+
+	return res
 }

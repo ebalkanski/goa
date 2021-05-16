@@ -26,22 +26,34 @@ type EditRequestBody struct {
 	Age  int    `form:"age" json:"age" xml:"age"`
 }
 
-// GetResponseBody is the type of the "user" service "get" endpoint HTTP
+// FetchResponseBody is the type of the "user" service "fetch" endpoint HTTP
 // response body.
-type GetResponseBody struct {
+type FetchResponseBody struct {
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	Age  *int    `form:"age,omitempty" json:"age,omitempty" xml:"age,omitempty"`
 }
 
-// GetBadRequestResponseBody is the type of the "user" service "get" endpoint
-// HTTP response body for the "BadRequest" error.
-type GetBadRequestResponseBody struct {
+// FetchAllResponseBody is the type of the "user" service "fetchAll" endpoint
+// HTTP response body.
+type FetchAllResponseBody struct {
+	Users []*UserResponseBody `form:"users,omitempty" json:"users,omitempty" xml:"users,omitempty"`
+}
+
+// FetchBadRequestResponseBody is the type of the "user" service "fetch"
+// endpoint HTTP response body for the "BadRequest" error.
+type FetchBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// GetInternalServerErrorResponseBody is the type of the "user" service "get"
-// endpoint HTTP response body for the "InternalServerError" error.
-type GetInternalServerErrorResponseBody struct {
+// FetchInternalServerErrorResponseBody is the type of the "user" service
+// "fetch" endpoint HTTP response body for the "InternalServerError" error.
+type FetchInternalServerErrorResponseBody struct {
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// FetchAllInternalServerErrorResponseBody is the type of the "user" service
+// "fetchAll" endpoint HTTP response body for the "InternalServerError" error.
+type FetchAllInternalServerErrorResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
@@ -81,6 +93,12 @@ type DeleteInternalServerErrorResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// UserResponseBody is used to define fields on response body types.
+type UserResponseBody struct {
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Age  *int    `form:"age,omitempty" json:"age,omitempty" xml:"age,omitempty"`
+}
+
 // NewCreateRequestBody builds the HTTP request body from the payload of the
 // "create" endpoint of the "user" service.
 func NewCreateRequestBody(p *user.User) *CreateRequestBody {
@@ -101,9 +119,9 @@ func NewEditRequestBody(p *user.User) *EditRequestBody {
 	return body
 }
 
-// NewGetUserOK builds a "user" service "get" endpoint result from a HTTP "OK"
-// response.
-func NewGetUserOK(body *GetResponseBody) *user.User {
+// NewFetchUserOK builds a "user" service "fetch" endpoint result from a HTTP
+// "OK" response.
+func NewFetchUserOK(body *FetchResponseBody) *user.User {
 	v := &user.User{
 		Name: *body.Name,
 		Age:  *body.Age,
@@ -112,8 +130,8 @@ func NewGetUserOK(body *GetResponseBody) *user.User {
 	return v
 }
 
-// NewGetBadRequest builds a user service get endpoint BadRequest error.
-func NewGetBadRequest(body *GetBadRequestResponseBody) *user.GoaError {
+// NewFetchBadRequest builds a user service fetch endpoint BadRequest error.
+func NewFetchBadRequest(body *FetchBadRequestResponseBody) *user.GoaError {
 	v := &user.GoaError{
 		Message: *body.Message,
 	}
@@ -121,9 +139,33 @@ func NewGetBadRequest(body *GetBadRequestResponseBody) *user.GoaError {
 	return v
 }
 
-// NewGetInternalServerError builds a user service get endpoint
+// NewFetchInternalServerError builds a user service fetch endpoint
 // InternalServerError error.
-func NewGetInternalServerError(body *GetInternalServerErrorResponseBody) *user.GoaError {
+func NewFetchInternalServerError(body *FetchInternalServerErrorResponseBody) *user.GoaError {
+	v := &user.GoaError{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewFetchAllResultOK builds a "user" service "fetchAll" endpoint result from
+// a HTTP "OK" response.
+func NewFetchAllResultOK(body *FetchAllResponseBody) *user.FetchAllResult {
+	v := &user.FetchAllResult{}
+	if body.Users != nil {
+		v.Users = make([]*user.User, len(body.Users))
+		for i, val := range body.Users {
+			v.Users[i] = unmarshalUserResponseBodyToUserUser(val)
+		}
+	}
+
+	return v
+}
+
+// NewFetchAllInternalServerError builds a user service fetchAll endpoint
+// InternalServerError error.
+func NewFetchAllInternalServerError(body *FetchAllInternalServerErrorResponseBody) *user.GoaError {
 	v := &user.GoaError{
 		Message: *body.Message,
 	}
@@ -188,8 +230,8 @@ func NewDeleteInternalServerError(body *DeleteInternalServerErrorResponseBody) *
 	return v
 }
 
-// ValidateGetResponseBody runs the validations defined on GetResponseBody
-func ValidateGetResponseBody(body *GetResponseBody) (err error) {
+// ValidateFetchResponseBody runs the validations defined on FetchResponseBody
+func ValidateFetchResponseBody(body *FetchResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}
@@ -199,18 +241,40 @@ func ValidateGetResponseBody(body *GetResponseBody) (err error) {
 	return
 }
 
-// ValidateGetBadRequestResponseBody runs the validations defined on
-// get_BadRequest_response_body
-func ValidateGetBadRequestResponseBody(body *GetBadRequestResponseBody) (err error) {
+// ValidateFetchAllResponseBody runs the validations defined on
+// FetchAllResponseBody
+func ValidateFetchAllResponseBody(body *FetchAllResponseBody) (err error) {
+	for _, e := range body.Users {
+		if e != nil {
+			if err2 := ValidateUserResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateFetchBadRequestResponseBody runs the validations defined on
+// fetch_BadRequest_response_body
+func ValidateFetchBadRequestResponseBody(body *FetchBadRequestResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }
 
-// ValidateGetInternalServerErrorResponseBody runs the validations defined on
-// get_InternalServerError_response_body
-func ValidateGetInternalServerErrorResponseBody(body *GetInternalServerErrorResponseBody) (err error) {
+// ValidateFetchInternalServerErrorResponseBody runs the validations defined on
+// fetch_InternalServerError_response_body
+func ValidateFetchInternalServerErrorResponseBody(body *FetchInternalServerErrorResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateFetchAllInternalServerErrorResponseBody runs the validations defined
+// on fetchAll_InternalServerError_response_body
+func ValidateFetchAllInternalServerErrorResponseBody(body *FetchAllInternalServerErrorResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
@@ -267,6 +331,17 @@ func ValidateDeleteBadRequestResponseBody(body *DeleteBadRequestResponseBody) (e
 func ValidateDeleteInternalServerErrorResponseBody(body *DeleteInternalServerErrorResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUserResponseBody runs the validations defined on UserResponseBody
+func ValidateUserResponseBody(body *UserResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Age == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("age", "body"))
 	}
 	return
 }

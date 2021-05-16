@@ -56,6 +56,37 @@ func (m mongoDB) User(ctx context.Context, name string) (*goauser.User, error) {
 	return &u, nil
 }
 
+// Users retrieves all users
+func (m mongoDB) Users(ctx context.Context) ([]*goauser.User, error) {
+	var usersResult []*goauser.User
+
+	users := m.Database(m.db).Collection("users")
+
+	cur, err := users.Find(ctx, bson.D{{}})
+	defer cur.Close(ctx)
+	if err != nil {
+		m.logger.Printf("cannot get users from db: %s\n", err.Error())
+		return nil, err
+	}
+
+	for cur.Next(ctx) {
+		var u goauser.User
+		err := cur.Decode(&u)
+		if err != nil {
+			m.logger.Printf("cannot decode user: %s\n", err.Error())
+			continue
+		}
+		usersResult = append(usersResult, &u)
+	}
+
+	if err := cur.Err(); err != nil {
+		m.logger.Printf("error while processing users: %s\n", err.Error())
+		return nil, err
+	}
+
+	return usersResult, nil
+}
+
 // CreateUser creates a user
 func (m mongoDB) Create(ctx context.Context, u *goauser.User) error {
 	ok, err := m.userExists(ctx, u)

@@ -26,22 +26,34 @@ type EditRequestBody struct {
 	Age  *int    `form:"age,omitempty" json:"age,omitempty" xml:"age,omitempty"`
 }
 
-// GetResponseBody is the type of the "user" service "get" endpoint HTTP
+// FetchResponseBody is the type of the "user" service "fetch" endpoint HTTP
 // response body.
-type GetResponseBody struct {
+type FetchResponseBody struct {
 	Name string `form:"name" json:"name" xml:"name"`
 	Age  int    `form:"age" json:"age" xml:"age"`
 }
 
-// GetBadRequestResponseBody is the type of the "user" service "get" endpoint
-// HTTP response body for the "BadRequest" error.
-type GetBadRequestResponseBody struct {
+// FetchAllResponseBody is the type of the "user" service "fetchAll" endpoint
+// HTTP response body.
+type FetchAllResponseBody struct {
+	Users []*UserResponseBody `form:"users,omitempty" json:"users,omitempty" xml:"users,omitempty"`
+}
+
+// FetchBadRequestResponseBody is the type of the "user" service "fetch"
+// endpoint HTTP response body for the "BadRequest" error.
+type FetchBadRequestResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
-// GetInternalServerErrorResponseBody is the type of the "user" service "get"
-// endpoint HTTP response body for the "InternalServerError" error.
-type GetInternalServerErrorResponseBody struct {
+// FetchInternalServerErrorResponseBody is the type of the "user" service
+// "fetch" endpoint HTTP response body for the "InternalServerError" error.
+type FetchInternalServerErrorResponseBody struct {
+	Message string `form:"message" json:"message" xml:"message"`
+}
+
+// FetchAllInternalServerErrorResponseBody is the type of the "user" service
+// "fetchAll" endpoint HTTP response body for the "InternalServerError" error.
+type FetchAllInternalServerErrorResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
@@ -81,29 +93,57 @@ type DeleteInternalServerErrorResponseBody struct {
 	Message string `form:"message" json:"message" xml:"message"`
 }
 
-// NewGetResponseBody builds the HTTP response body from the result of the
-// "get" endpoint of the "user" service.
-func NewGetResponseBody(res *user.User) *GetResponseBody {
-	body := &GetResponseBody{
+// UserResponseBody is used to define fields on response body types.
+type UserResponseBody struct {
+	Name string `form:"name" json:"name" xml:"name"`
+	Age  int    `form:"age" json:"age" xml:"age"`
+}
+
+// NewFetchResponseBody builds the HTTP response body from the result of the
+// "fetch" endpoint of the "user" service.
+func NewFetchResponseBody(res *user.User) *FetchResponseBody {
+	body := &FetchResponseBody{
 		Name: res.Name,
 		Age:  res.Age,
 	}
 	return body
 }
 
-// NewGetBadRequestResponseBody builds the HTTP response body from the result
-// of the "get" endpoint of the "user" service.
-func NewGetBadRequestResponseBody(res *user.GoaError) *GetBadRequestResponseBody {
-	body := &GetBadRequestResponseBody{
+// NewFetchAllResponseBody builds the HTTP response body from the result of the
+// "fetchAll" endpoint of the "user" service.
+func NewFetchAllResponseBody(res *user.FetchAllResult) *FetchAllResponseBody {
+	body := &FetchAllResponseBody{}
+	if res.Users != nil {
+		body.Users = make([]*UserResponseBody, len(res.Users))
+		for i, val := range res.Users {
+			body.Users[i] = marshalUserUserToUserResponseBody(val)
+		}
+	}
+	return body
+}
+
+// NewFetchBadRequestResponseBody builds the HTTP response body from the result
+// of the "fetch" endpoint of the "user" service.
+func NewFetchBadRequestResponseBody(res *user.GoaError) *FetchBadRequestResponseBody {
+	body := &FetchBadRequestResponseBody{
 		Message: res.Message,
 	}
 	return body
 }
 
-// NewGetInternalServerErrorResponseBody builds the HTTP response body from the
-// result of the "get" endpoint of the "user" service.
-func NewGetInternalServerErrorResponseBody(res *user.GoaError) *GetInternalServerErrorResponseBody {
-	body := &GetInternalServerErrorResponseBody{
+// NewFetchInternalServerErrorResponseBody builds the HTTP response body from
+// the result of the "fetch" endpoint of the "user" service.
+func NewFetchInternalServerErrorResponseBody(res *user.GoaError) *FetchInternalServerErrorResponseBody {
+	body := &FetchInternalServerErrorResponseBody{
+		Message: res.Message,
+	}
+	return body
+}
+
+// NewFetchAllInternalServerErrorResponseBody builds the HTTP response body
+// from the result of the "fetchAll" endpoint of the "user" service.
+func NewFetchAllInternalServerErrorResponseBody(res *user.GoaError) *FetchAllInternalServerErrorResponseBody {
+	body := &FetchAllInternalServerErrorResponseBody{
 		Message: res.Message,
 	}
 	return body
@@ -163,9 +203,9 @@ func NewDeleteInternalServerErrorResponseBody(res *user.GoaError) *DeleteInterna
 	return body
 }
 
-// NewGetPayload builds a user service get endpoint payload.
-func NewGetPayload(name string) *user.GetPayload {
-	v := &user.GetPayload{}
+// NewFetchPayload builds a user service fetch endpoint payload.
+func NewFetchPayload(name string) *user.FetchPayload {
+	v := &user.FetchPayload{}
 	v.Name = name
 
 	return v

@@ -17,21 +17,21 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// EncodeGetResponse returns an encoder for responses returned by the user get
-// endpoint.
-func EncodeGetResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+// EncodeFetchResponse returns an encoder for responses returned by the user
+// fetch endpoint.
+func EncodeFetchResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
 		res := v.(*user.User)
 		enc := encoder(ctx, w)
-		body := NewGetResponseBody(res)
+		body := NewFetchResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
 	}
 }
 
-// DecodeGetRequest returns a decoder for requests sent to the user get
+// DecodeFetchRequest returns a decoder for requests sent to the user fetch
 // endpoint.
-func DecodeGetRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
+func DecodeFetchRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
 	return func(r *http.Request) (interface{}, error) {
 		var (
 			name string
@@ -39,15 +39,15 @@ func DecodeGetRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Dec
 			params = mux.Vars(r)
 		)
 		name = params["name"]
-		payload := NewGetPayload(name)
+		payload := NewFetchPayload(name)
 
 		return payload, nil
 	}
 }
 
-// EncodeGetError returns an encoder for errors returned by the get user
+// EncodeFetchError returns an encoder for errors returned by the fetch user
 // endpoint.
-func EncodeGetError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+func EncodeFetchError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
 	encodeError := goahttp.ErrorEncoder(encoder, formatter)
 	return func(ctx context.Context, w http.ResponseWriter, v error) error {
 		en, ok := v.(ErrorNamer)
@@ -62,7 +62,7 @@ func EncodeGetError(encoder func(context.Context, http.ResponseWriter) goahttp.E
 			if formatter != nil {
 				body = formatter(res)
 			} else {
-				body = NewGetBadRequestResponseBody(res)
+				body = NewFetchBadRequestResponseBody(res)
 			}
 			w.Header().Set("goa-error", "BadRequest")
 			w.WriteHeader(http.StatusBadRequest)
@@ -74,7 +74,47 @@ func EncodeGetError(encoder func(context.Context, http.ResponseWriter) goahttp.E
 			if formatter != nil {
 				body = formatter(res)
 			} else {
-				body = NewGetInternalServerErrorResponseBody(res)
+				body = NewFetchInternalServerErrorResponseBody(res)
+			}
+			w.Header().Set("goa-error", "InternalServerError")
+			w.WriteHeader(http.StatusInternalServerError)
+			return enc.Encode(body)
+		default:
+			return encodeError(ctx, w, v)
+		}
+	}
+}
+
+// EncodeFetchAllResponse returns an encoder for responses returned by the user
+// fetchAll endpoint.
+func EncodeFetchAllResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
+	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
+		res := v.(*user.FetchAllResult)
+		enc := encoder(ctx, w)
+		body := NewFetchAllResponseBody(res)
+		w.WriteHeader(http.StatusOK)
+		return enc.Encode(body)
+	}
+}
+
+// EncodeFetchAllError returns an encoder for errors returned by the fetchAll
+// user endpoint.
+func EncodeFetchAllError(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder, formatter func(err error) goahttp.Statuser) func(context.Context, http.ResponseWriter, error) error {
+	encodeError := goahttp.ErrorEncoder(encoder, formatter)
+	return func(ctx context.Context, w http.ResponseWriter, v error) error {
+		en, ok := v.(ErrorNamer)
+		if !ok {
+			return encodeError(ctx, w, v)
+		}
+		switch en.ErrorName() {
+		case "InternalServerError":
+			res := v.(*user.GoaError)
+			enc := encoder(ctx, w)
+			var body interface{}
+			if formatter != nil {
+				body = formatter(res)
+			} else {
+				body = NewFetchAllInternalServerErrorResponseBody(res)
 			}
 			w.Header().Set("goa-error", "InternalServerError")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -296,4 +336,18 @@ func EncodeDeleteError(encoder func(context.Context, http.ResponseWriter) goahtt
 			return encodeError(ctx, w, v)
 		}
 	}
+}
+
+// marshalUserUserToUserResponseBody builds a value of type *UserResponseBody
+// from a value of type *user.User.
+func marshalUserUserToUserResponseBody(v *user.User) *UserResponseBody {
+	if v == nil {
+		return nil
+	}
+	res := &UserResponseBody{
+		Name: v.Name,
+		Age:  v.Age,
+	}
+
+	return res
 }

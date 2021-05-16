@@ -10,7 +10,6 @@ paths:
     post:
       tags:
       - user
-      summary: create user
       description: Create new user.
       operationId: user#create
       requestBody:
@@ -44,7 +43,6 @@ paths:
     put:
       tags:
       - user
-      summary: edit user
       description: Edit user.
       operationId: user#edit
       requestBody:
@@ -79,7 +77,6 @@ paths:
     delete:
       tags:
       - user
-      summary: delete user
       description: Delete user.
       operationId: user#delete
       parameters:
@@ -112,9 +109,8 @@ paths:
     get:
       tags:
       - user
-      summary: get user
       description: Fetch user.
-      operationId: user#get
+      operationId: user#fetch
       parameters:
       - name: name
         in: path
@@ -149,8 +145,53 @@ paths:
                 $ref: '#/components/schemas/GoaError'
               example:
                 message: error
+  /users:
+    get:
+      tags:
+      - user
+      description: Fetch all users.
+      operationId: user#fetchAll
+      responses:
+        "200":
+          description: OK response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FetchAllResponseBody'
+              example:
+                users:
+                - name: Bob
+                  age: 25
+                - name: John
+                  age: 33
+        "500":
+          description: Internal Server Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoaError'
+              example:
+                message: error
 components:
   schemas:
+    FetchAllResponseBody:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          example:
+          - name: Bob
+            age: 25
+          - name: John
+            age: 33
+      example:
+        users:
+        - name: Bob
+          age: 25
+        - name: John
+          age: 33
     GoaError:
       type: object
       properties:

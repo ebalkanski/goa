@@ -14,7 +14,9 @@ import (
 // The user service process users
 type Service interface {
 	// Fetch user.
-	Get(context.Context, *GetPayload) (res *User, err error)
+	Fetch(context.Context, *FetchPayload) (res *User, err error)
+	// Fetch all users.
+	FetchAll(context.Context) (res *FetchAllResult, err error)
 	// Create new user.
 	Create(context.Context, *User) (err error)
 	// Edit user.
@@ -31,17 +33,22 @@ const ServiceName = "user"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [4]string{"get", "create", "edit", "delete"}
+var MethodNames = [5]string{"fetch", "fetchAll", "create", "edit", "delete"}
 
-// GetPayload is the payload type of the user service get method.
-type GetPayload struct {
+// FetchPayload is the payload type of the user service fetch method.
+type FetchPayload struct {
 	Name string
 }
 
-// User is the result type of the user service get method.
+// User is the result type of the user service fetch method.
 type User struct {
 	Name string
 	Age  int
+}
+
+// FetchAllResult is the result type of the user service fetchAll method.
+type FetchAllResult struct {
+	Users []*User
 }
 
 // DeletePayload is the payload type of the user service delete method.

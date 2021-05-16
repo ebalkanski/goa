@@ -15,30 +15,42 @@ import (
 
 // Client is the "user" service client.
 type Client struct {
-	GetEndpoint    goa.Endpoint
-	CreateEndpoint goa.Endpoint
-	EditEndpoint   goa.Endpoint
-	DeleteEndpoint goa.Endpoint
+	FetchEndpoint    goa.Endpoint
+	FetchAllEndpoint goa.Endpoint
+	CreateEndpoint   goa.Endpoint
+	EditEndpoint     goa.Endpoint
+	DeleteEndpoint   goa.Endpoint
 }
 
 // NewClient initializes a "user" service client given the endpoints.
-func NewClient(get, create, edit, delete_ goa.Endpoint) *Client {
+func NewClient(fetch, fetchAll, create, edit, delete_ goa.Endpoint) *Client {
 	return &Client{
-		GetEndpoint:    get,
-		CreateEndpoint: create,
-		EditEndpoint:   edit,
-		DeleteEndpoint: delete_,
+		FetchEndpoint:    fetch,
+		FetchAllEndpoint: fetchAll,
+		CreateEndpoint:   create,
+		EditEndpoint:     edit,
+		DeleteEndpoint:   delete_,
 	}
 }
 
-// Get calls the "get" endpoint of the "user" service.
-func (c *Client) Get(ctx context.Context, p *GetPayload) (res *User, err error) {
+// Fetch calls the "fetch" endpoint of the "user" service.
+func (c *Client) Fetch(ctx context.Context, p *FetchPayload) (res *User, err error) {
 	var ires interface{}
-	ires, err = c.GetEndpoint(ctx, p)
+	ires, err = c.FetchEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
 	return ires.(*User), nil
+}
+
+// FetchAll calls the "fetchAll" endpoint of the "user" service.
+func (c *Client) FetchAll(ctx context.Context) (res *FetchAllResult, err error) {
+	var ires interface{}
+	ires, err = c.FetchAllEndpoint(ctx, nil)
+	if err != nil {
+		return
+	}
+	return ires.(*FetchAllResult), nil
 }
 
 // Create calls the "create" endpoint of the "user" service.

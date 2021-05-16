@@ -1,6 +1,7 @@
 package design
 
 import (
+	"github.com/ebalkanski/goa/gen/user"
 	. "goa.design/goa/v3/dsl"
 )
 
@@ -19,8 +20,9 @@ var _ = Service("user", func() {
 	Error("BadRequest", GoaError)
 	Error("InternalServerError", GoaError)
 
-	Method("get", func() {
+	Method("fetch", func() {
 		Description("Fetch user.")
+		Meta("swagger:summary", "")
 		Payload(func() {
 			Attribute("name", String, func() {
 				Example("Bob")
@@ -40,8 +42,27 @@ var _ = Service("user", func() {
 		})
 	})
 
+	Method("fetchAll", func() {
+		Description("Fetch all users.")
+		Meta("swagger:summary", "")
+		Result(func() {
+			Attribute("users", ArrayOf(User), func() {
+				Example([]user.User{
+					{Name: "Bob", Age: 25},
+					{Name: "John", Age: 33},
+				})
+			})
+		})
+		HTTP(func() {
+			GET("/users")
+			Response(StatusOK)
+			Response("InternalServerError", StatusInternalServerError)
+		})
+	})
+
 	Method("create", func() {
 		Description("Create new user.")
+		Meta("swagger:summary", "")
 		Payload(User)
 		HTTP(func() {
 			POST("/user")
@@ -55,6 +76,7 @@ var _ = Service("user", func() {
 
 	Method("edit", func() {
 		Description("Edit user.")
+		Meta("swagger:summary", "")
 		Payload(User)
 		HTTP(func() {
 			PUT("/user")
@@ -68,6 +90,7 @@ var _ = Service("user", func() {
 
 	Method("delete", func() {
 		Description("Delete user.")
+		Meta("swagger:summary", "")
 		Payload(func() {
 			Attribute("name", String, func() {
 				Example("Bob")

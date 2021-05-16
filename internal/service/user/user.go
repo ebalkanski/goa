@@ -14,6 +14,7 @@ var UserExists = errors.New("such user already exists")
 
 type UserStorage interface {
 	User(ctx context.Context, name string) (*goauser.User, error)
+	Users(ctx context.Context) ([]*goauser.User, error)
 	Create(ctx context.Context, u *goauser.User) error
 	Edit(ctx context.Context, u *goauser.User) error
 	Delete(ctx context.Context, name string) error
@@ -32,8 +33,8 @@ func NewUser(logger *log.Logger, storage UserStorage) goauser.Service {
 	}
 }
 
-// Get returns User info
-func (s *user) Get(ctx context.Context, p *goauser.GetPayload) (res *goauser.User, err error) {
+// Fetch returns User info
+func (s *user) Fetch(ctx context.Context, p *goauser.FetchPayload) (res *goauser.User, err error) {
 	u, err := s.storage.User(ctx, p.Name)
 	if err != nil {
 		if err == UserNotFound || err == UserExists {
@@ -44,6 +45,16 @@ func (s *user) Get(ctx context.Context, p *goauser.GetPayload) (res *goauser.Use
 	}
 
 	return u, nil
+}
+
+// FetchAll returns all Users info
+func (s *user) FetchAll(ctx context.Context) (res *goauser.FetchAllResult, err error) {
+	users, err := s.storage.Users(ctx)
+	if err != nil {
+		return nil, goa_errors.NewInternalServerError(errors.New("cannot get users"))
+	}
+
+	return &goauser.FetchAllResult{Users: users}, nil
 }
 
 // Create creates a new user

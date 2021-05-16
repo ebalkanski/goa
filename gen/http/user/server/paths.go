@@ -11,9 +11,14 @@ import (
 	"fmt"
 )
 
-// GetUserPath returns the URL path to the user service get HTTP endpoint.
-func GetUserPath(name string) string {
+// FetchUserPath returns the URL path to the user service fetch HTTP endpoint.
+func FetchUserPath(name string) string {
 	return fmt.Sprintf("/user/%v", name)
+}
+
+// FetchAllUserPath returns the URL path to the user service fetchAll HTTP endpoint.
+func FetchAllUserPath() string {
+	return "/users"
 }
 
 // CreateUserPath returns the URL path to the user service create HTTP endpoint.

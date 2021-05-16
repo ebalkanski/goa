@@ -14,13 +14,14 @@ import (
 	user "github.com/ebalkanski/goa/gen/user"
 )
 
-// BuildGetPayload builds the payload for the user get endpoint from CLI flags.
-func BuildGetPayload(userGetName string) (*user.GetPayload, error) {
+// BuildFetchPayload builds the payload for the user fetch endpoint from CLI
+// flags.
+func BuildFetchPayload(userFetchName string) (*user.FetchPayload, error) {
 	var name string
 	{
-		name = userGetName
+		name = userFetchName
 	}
-	v := &user.GetPayload{}
+	v := &user.FetchPayload{}
 	v.Name = name
 
 	return v, nil
