@@ -9,8 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ebalkanski/goa/internal/config"
-
 	"github.com/kelseyhightower/envconfig"
 	goahttp "goa.design/goa/v3/http"
 	httpmdlwr "goa.design/goa/v3/http/middleware"
@@ -21,6 +19,7 @@ import (
 	usersvr "github.com/ebalkanski/goa/gen/http/user/server"
 	goauser "github.com/ebalkanski/goa/gen/user"
 	"github.com/ebalkanski/goa/internal/clients/storage"
+	"github.com/ebalkanski/goa/internal/config"
 	"github.com/ebalkanski/goa/internal/service/goa_errors"
 	"github.com/ebalkanski/goa/internal/service/user"
 )
