@@ -69,7 +69,14 @@ func (svc *User) Create(ctx context.Context, u *goauser.User) (err error) {
 
 // Edit edits a user
 func (svc *User) Edit(ctx context.Context, u *goauser.User) (err error) {
-	return svc.repo.Edit(ctx, u)
+	if err := svc.repo.Edit(ctx, u); err != nil {
+		if err == UserNotFound {
+			return goa_errors.NewBadRequestError(err)
+		}
+		return goa_errors.NewBadRequestError(errors.New("user cannot be edited"))
+	}
+
+	return nil
 }
 
 // Delete deletes a user
@@ -79,7 +86,7 @@ func (svc *User) Delete(ctx context.Context, p *goauser.DeletePayload) (err erro
 			return goa_errors.NewBadRequestError(err)
 		}
 
-		return goa_errors.NewInternalServerError(err)
+		return goa_errors.NewInternalServerError(errors.New("user cannot be deleted"))
 	}
 
 	return nil
