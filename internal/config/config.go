@@ -1,6 +1,6 @@
-package main
+package config
 
-type config struct {
+type Config struct {
 	Mongo mongoConfig
 }
 

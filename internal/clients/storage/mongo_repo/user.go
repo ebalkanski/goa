@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	goauser "github.com/ebalkanski/goa/gen/user"
-	storage "github.com/ebalkanski/goa/internal/clients/storage/mongo"
 	"github.com/ebalkanski/goa/internal/service/user"
 )
 
@@ -18,8 +17,7 @@ type UserRepo struct {
 }
 
 // NewUserRepo returns new repository client
-func NewUserRepo(logger *log.Logger, m *storage.MongoDB, db string) *UserRepo {
-	collection := m.Database(db).Collection("users")
+func NewUserRepo(logger *log.Logger, collection *mongo.Collection) *UserRepo {
 	return &UserRepo{
 		logger,
 		collection,
