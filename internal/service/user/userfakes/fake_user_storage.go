@@ -9,7 +9,7 @@ import (
 	"github.com/ebalkanski/goa/internal/service/user"
 )
 
-type FakeUserRepo struct {
+type FakeUserStorage struct {
 	CreateStub        func(context.Context, *usera.User) error
 	createMutex       sync.RWMutex
 	createArgsForCall []struct {
@@ -77,7 +77,7 @@ type FakeUserRepo struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeUserRepo) Create(arg1 context.Context, arg2 *usera.User) error {
+func (fake *FakeUserStorage) Create(arg1 context.Context, arg2 *usera.User) error {
 	fake.createMutex.Lock()
 	ret, specificReturn := fake.createReturnsOnCall[len(fake.createArgsForCall)]
 	fake.createArgsForCall = append(fake.createArgsForCall, struct {
@@ -97,26 +97,26 @@ func (fake *FakeUserRepo) Create(arg1 context.Context, arg2 *usera.User) error {
 	return fakeReturns.result1
 }
 
-func (fake *FakeUserRepo) CreateCallCount() int {
+func (fake *FakeUserStorage) CreateCallCount() int {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	return len(fake.createArgsForCall)
 }
 
-func (fake *FakeUserRepo) CreateCalls(stub func(context.Context, *usera.User) error) {
+func (fake *FakeUserStorage) CreateCalls(stub func(context.Context, *usera.User) error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = stub
 }
 
-func (fake *FakeUserRepo) CreateArgsForCall(i int) (context.Context, *usera.User) {
+func (fake *FakeUserStorage) CreateArgsForCall(i int) (context.Context, *usera.User) {
 	fake.createMutex.RLock()
 	defer fake.createMutex.RUnlock()
 	argsForCall := fake.createArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeUserRepo) CreateReturns(result1 error) {
+func (fake *FakeUserStorage) CreateReturns(result1 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
@@ -125,7 +125,7 @@ func (fake *FakeUserRepo) CreateReturns(result1 error) {
 	}{result1}
 }
 
-func (fake *FakeUserRepo) CreateReturnsOnCall(i int, result1 error) {
+func (fake *FakeUserStorage) CreateReturnsOnCall(i int, result1 error) {
 	fake.createMutex.Lock()
 	defer fake.createMutex.Unlock()
 	fake.CreateStub = nil
@@ -139,7 +139,7 @@ func (fake *FakeUserRepo) CreateReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeUserRepo) Delete(arg1 context.Context, arg2 string) error {
+func (fake *FakeUserStorage) Delete(arg1 context.Context, arg2 string) error {
 	fake.deleteMutex.Lock()
 	ret, specificReturn := fake.deleteReturnsOnCall[len(fake.deleteArgsForCall)]
 	fake.deleteArgsForCall = append(fake.deleteArgsForCall, struct {
@@ -159,26 +159,26 @@ func (fake *FakeUserRepo) Delete(arg1 context.Context, arg2 string) error {
 	return fakeReturns.result1
 }
 
-func (fake *FakeUserRepo) DeleteCallCount() int {
+func (fake *FakeUserStorage) DeleteCallCount() int {
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	return len(fake.deleteArgsForCall)
 }
 
-func (fake *FakeUserRepo) DeleteCalls(stub func(context.Context, string) error) {
+func (fake *FakeUserStorage) DeleteCalls(stub func(context.Context, string) error) {
 	fake.deleteMutex.Lock()
 	defer fake.deleteMutex.Unlock()
 	fake.DeleteStub = stub
 }
 
-func (fake *FakeUserRepo) DeleteArgsForCall(i int) (context.Context, string) {
+func (fake *FakeUserStorage) DeleteArgsForCall(i int) (context.Context, string) {
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	argsForCall := fake.deleteArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeUserRepo) DeleteReturns(result1 error) {
+func (fake *FakeUserStorage) DeleteReturns(result1 error) {
 	fake.deleteMutex.Lock()
 	defer fake.deleteMutex.Unlock()
 	fake.DeleteStub = nil
@@ -187,7 +187,7 @@ func (fake *FakeUserRepo) DeleteReturns(result1 error) {
 	}{result1}
 }
 
-func (fake *FakeUserRepo) DeleteReturnsOnCall(i int, result1 error) {
+func (fake *FakeUserStorage) DeleteReturnsOnCall(i int, result1 error) {
 	fake.deleteMutex.Lock()
 	defer fake.deleteMutex.Unlock()
 	fake.DeleteStub = nil
@@ -201,7 +201,7 @@ func (fake *FakeUserRepo) DeleteReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeUserRepo) Edit(arg1 context.Context, arg2 *usera.User) error {
+func (fake *FakeUserStorage) Edit(arg1 context.Context, arg2 *usera.User) error {
 	fake.editMutex.Lock()
 	ret, specificReturn := fake.editReturnsOnCall[len(fake.editArgsForCall)]
 	fake.editArgsForCall = append(fake.editArgsForCall, struct {
@@ -221,26 +221,26 @@ func (fake *FakeUserRepo) Edit(arg1 context.Context, arg2 *usera.User) error {
 	return fakeReturns.result1
 }
 
-func (fake *FakeUserRepo) EditCallCount() int {
+func (fake *FakeUserStorage) EditCallCount() int {
 	fake.editMutex.RLock()
 	defer fake.editMutex.RUnlock()
 	return len(fake.editArgsForCall)
 }
 
-func (fake *FakeUserRepo) EditCalls(stub func(context.Context, *usera.User) error) {
+func (fake *FakeUserStorage) EditCalls(stub func(context.Context, *usera.User) error) {
 	fake.editMutex.Lock()
 	defer fake.editMutex.Unlock()
 	fake.EditStub = stub
 }
 
-func (fake *FakeUserRepo) EditArgsForCall(i int) (context.Context, *usera.User) {
+func (fake *FakeUserStorage) EditArgsForCall(i int) (context.Context, *usera.User) {
 	fake.editMutex.RLock()
 	defer fake.editMutex.RUnlock()
 	argsForCall := fake.editArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeUserRepo) EditReturns(result1 error) {
+func (fake *FakeUserStorage) EditReturns(result1 error) {
 	fake.editMutex.Lock()
 	defer fake.editMutex.Unlock()
 	fake.EditStub = nil
@@ -249,7 +249,7 @@ func (fake *FakeUserRepo) EditReturns(result1 error) {
 	}{result1}
 }
 
-func (fake *FakeUserRepo) EditReturnsOnCall(i int, result1 error) {
+func (fake *FakeUserStorage) EditReturnsOnCall(i int, result1 error) {
 	fake.editMutex.Lock()
 	defer fake.editMutex.Unlock()
 	fake.EditStub = nil
@@ -263,7 +263,7 @@ func (fake *FakeUserRepo) EditReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeUserRepo) User(arg1 context.Context, arg2 string) (*usera.User, error) {
+func (fake *FakeUserStorage) User(arg1 context.Context, arg2 string) (*usera.User, error) {
 	fake.userMutex.Lock()
 	ret, specificReturn := fake.userReturnsOnCall[len(fake.userArgsForCall)]
 	fake.userArgsForCall = append(fake.userArgsForCall, struct {
@@ -283,26 +283,26 @@ func (fake *FakeUserRepo) User(arg1 context.Context, arg2 string) (*usera.User, 
 	return fakeReturns.result1, fakeReturns.result2
 }
 
-func (fake *FakeUserRepo) UserCallCount() int {
+func (fake *FakeUserStorage) UserCallCount() int {
 	fake.userMutex.RLock()
 	defer fake.userMutex.RUnlock()
 	return len(fake.userArgsForCall)
 }
 
-func (fake *FakeUserRepo) UserCalls(stub func(context.Context, string) (*usera.User, error)) {
+func (fake *FakeUserStorage) UserCalls(stub func(context.Context, string) (*usera.User, error)) {
 	fake.userMutex.Lock()
 	defer fake.userMutex.Unlock()
 	fake.UserStub = stub
 }
 
-func (fake *FakeUserRepo) UserArgsForCall(i int) (context.Context, string) {
+func (fake *FakeUserStorage) UserArgsForCall(i int) (context.Context, string) {
 	fake.userMutex.RLock()
 	defer fake.userMutex.RUnlock()
 	argsForCall := fake.userArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeUserRepo) UserReturns(result1 *usera.User, result2 error) {
+func (fake *FakeUserStorage) UserReturns(result1 *usera.User, result2 error) {
 	fake.userMutex.Lock()
 	defer fake.userMutex.Unlock()
 	fake.UserStub = nil
@@ -312,7 +312,7 @@ func (fake *FakeUserRepo) UserReturns(result1 *usera.User, result2 error) {
 	}{result1, result2}
 }
 
-func (fake *FakeUserRepo) UserReturnsOnCall(i int, result1 *usera.User, result2 error) {
+func (fake *FakeUserStorage) UserReturnsOnCall(i int, result1 *usera.User, result2 error) {
 	fake.userMutex.Lock()
 	defer fake.userMutex.Unlock()
 	fake.UserStub = nil
@@ -328,7 +328,7 @@ func (fake *FakeUserRepo) UserReturnsOnCall(i int, result1 *usera.User, result2 
 	}{result1, result2}
 }
 
-func (fake *FakeUserRepo) Users(arg1 context.Context) ([]*usera.User, error) {
+func (fake *FakeUserStorage) Users(arg1 context.Context) ([]*usera.User, error) {
 	fake.usersMutex.Lock()
 	ret, specificReturn := fake.usersReturnsOnCall[len(fake.usersArgsForCall)]
 	fake.usersArgsForCall = append(fake.usersArgsForCall, struct {
@@ -347,26 +347,26 @@ func (fake *FakeUserRepo) Users(arg1 context.Context) ([]*usera.User, error) {
 	return fakeReturns.result1, fakeReturns.result2
 }
 
-func (fake *FakeUserRepo) UsersCallCount() int {
+func (fake *FakeUserStorage) UsersCallCount() int {
 	fake.usersMutex.RLock()
 	defer fake.usersMutex.RUnlock()
 	return len(fake.usersArgsForCall)
 }
 
-func (fake *FakeUserRepo) UsersCalls(stub func(context.Context) ([]*usera.User, error)) {
+func (fake *FakeUserStorage) UsersCalls(stub func(context.Context) ([]*usera.User, error)) {
 	fake.usersMutex.Lock()
 	defer fake.usersMutex.Unlock()
 	fake.UsersStub = stub
 }
 
-func (fake *FakeUserRepo) UsersArgsForCall(i int) context.Context {
+func (fake *FakeUserStorage) UsersArgsForCall(i int) context.Context {
 	fake.usersMutex.RLock()
 	defer fake.usersMutex.RUnlock()
 	argsForCall := fake.usersArgsForCall[i]
 	return argsForCall.arg1
 }
 
-func (fake *FakeUserRepo) UsersReturns(result1 []*usera.User, result2 error) {
+func (fake *FakeUserStorage) UsersReturns(result1 []*usera.User, result2 error) {
 	fake.usersMutex.Lock()
 	defer fake.usersMutex.Unlock()
 	fake.UsersStub = nil
@@ -376,7 +376,7 @@ func (fake *FakeUserRepo) UsersReturns(result1 []*usera.User, result2 error) {
 	}{result1, result2}
 }
 
-func (fake *FakeUserRepo) UsersReturnsOnCall(i int, result1 []*usera.User, result2 error) {
+func (fake *FakeUserStorage) UsersReturnsOnCall(i int, result1 []*usera.User, result2 error) {
 	fake.usersMutex.Lock()
 	defer fake.usersMutex.Unlock()
 	fake.UsersStub = nil
@@ -392,7 +392,7 @@ func (fake *FakeUserRepo) UsersReturnsOnCall(i int, result1 []*usera.User, resul
 	}{result1, result2}
 }
 
-func (fake *FakeUserRepo) Invocations() map[string][][]interface{} {
+func (fake *FakeUserStorage) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.createMutex.RLock()
@@ -412,7 +412,7 @@ func (fake *FakeUserRepo) Invocations() map[string][][]interface{} {
 	return copiedInvocations
 }
 
-func (fake *FakeUserRepo) recordInvocation(key string, args []interface{}) {
+func (fake *FakeUserStorage) recordInvocation(key string, args []interface{}) {
 	fake.invocationsMutex.Lock()
 	defer fake.invocationsMutex.Unlock()
 	if fake.invocations == nil {
@@ -424,4 +424,4 @@ func (fake *FakeUserRepo) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ user.UserRepo = new(FakeUserRepo)
+var _ user.UserStorage = new(FakeUserStorage)

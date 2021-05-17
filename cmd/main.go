@@ -20,8 +20,7 @@ import (
 	openapisvr "github.com/ebalkanski/goa/gen/http/openapi/server"
 	usersvr "github.com/ebalkanski/goa/gen/http/user/server"
 	goauser "github.com/ebalkanski/goa/gen/user"
-	storage "github.com/ebalkanski/goa/internal/clients/storage/mongo"
-	"github.com/ebalkanski/goa/internal/clients/storage/mongo_repo"
+	"github.com/ebalkanski/goa/internal/clients/storage"
 	"github.com/ebalkanski/goa/internal/service/goa_errors"
 	"github.com/ebalkanski/goa/internal/service/user"
 )
@@ -48,16 +47,16 @@ func main() {
 	mongoDB := storage.NewMongo(logger, ctx, cfg.Mongo.URI)
 	defer mongoDB.Disconnect(ctx)
 
-	// Create repositories
+	// Create storage clients
 	collection := mongoDB.Database(cfg.Mongo.DB).Collection("users")
-	userRepo := mongo_repo.NewUserRepo(logger, collection)
+	userStorage := storage.NewUser(logger, collection)
 
 	// Initialize the services.
 	var (
 		userSvc goauser.Service
 	)
 	{
-		userSvc = user.NewUser(userRepo)
+		userSvc = user.NewUser(userStorage)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services

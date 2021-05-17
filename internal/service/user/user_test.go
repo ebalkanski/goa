@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/ebalkanski/goa/internal/service/user"
-
 	"github.com/stretchr/testify/assert"
 
 	goauser "github.com/ebalkanski/goa/gen/user"
 	"github.com/ebalkanski/goa/internal/service/goa_errors"
+	"github.com/ebalkanski/goa/internal/service/user"
 	"github.com/ebalkanski/goa/internal/service/user/userfakes"
 )
 
@@ -23,8 +22,8 @@ func userBob() *goauser.User {
 }
 
 func TestNewUser(t *testing.T) {
-	repo := &userfakes.FakeUserRepo{}
-	svc := user.NewUser(repo)
+	storage := &userfakes.FakeUserStorage{}
+	svc := user.NewUser(storage)
 	assert.IsType(t, &user.User{}, svc)
 }
 
@@ -55,7 +54,7 @@ func TestFetchFails(t *testing.T) {
 			errText: user.UserExists.Error(),
 		},
 		{
-			name:    "error in repo",
+			name:    "error in storage",
 			payload: &goauser.FetchPayload{Name: "Bob"},
 			userStub: func(ctx context.Context, s string) (*goauser.User, error) {
 				return nil, errors.New("ERROR")
@@ -66,10 +65,10 @@ func TestFetchFails(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.UserStub = test.userStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.UserStub = test.userStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			res, err := svc.Fetch(context.Background(), test.payload)
 
 			assert.Nil(t, res)
@@ -101,10 +100,10 @@ func TestFetch(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.UserStub = test.userStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.UserStub = test.userStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			res, err := svc.Fetch(context.Background(), test.payload)
 
 			assert.Equal(t, test.res, res)
@@ -121,7 +120,7 @@ func TestFetchAllFails(t *testing.T) {
 		errText string
 	}{
 		{
-			name: "cannot get users from repo",
+			name: "cannot get users from storage",
 			usersStub: func(ctx context.Context) ([]*goauser.User, error) {
 				return nil, errors.New("ERROR")
 			},
@@ -131,10 +130,10 @@ func TestFetchAllFails(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.UsersStub = test.usersStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.UsersStub = test.usersStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			res, err := svc.FetchAll(context.Background())
 
 			assert.Nil(t, res)
@@ -155,7 +154,7 @@ func TestFetchAll(t *testing.T) {
 		res *goauser.Users
 	}{
 		{
-			name: "get users from repo",
+			name: "get users from storage",
 			usersStub: func(ctx context.Context) ([]*goauser.User, error) {
 				return []*goauser.User{
 					userBob(),
@@ -171,10 +170,10 @@ func TestFetchAll(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.UsersStub = test.usersStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.UsersStub = test.usersStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			res, err := svc.FetchAll(context.Background())
 
 			assert.Equal(t, test.res, res)
@@ -201,7 +200,7 @@ func TestCreateFails(t *testing.T) {
 			errText: user.UserExists.Error(),
 		},
 		{
-			name: "repo error",
+			name: "storage error",
 			createStub: func(context.Context, *goauser.User) error {
 				return errors.New("ERROR")
 			},
@@ -212,10 +211,10 @@ func TestCreateFails(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.CreateStub = test.createStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.CreateStub = test.createStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			err := svc.Create(context.Background(), test.user)
 
 			assert.IsType(t, &goa_errors.Error{}, err)
@@ -243,10 +242,10 @@ func TestCreate(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.CreateStub = test.createStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.CreateStub = test.createStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			err := svc.Create(context.Background(), test.user)
 
 			assert.Nil(t, err)
@@ -272,7 +271,7 @@ func TestEditFails(t *testing.T) {
 			errText: user.UserNotFound.Error(),
 		},
 		{
-			name: "repo error",
+			name: "storage error",
 			editStub: func(context.Context, *goauser.User) error {
 				return errors.New("ERROR")
 			},
@@ -283,10 +282,10 @@ func TestEditFails(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.EditStub = test.editStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.EditStub = test.editStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			err := svc.Edit(context.Background(), test.user)
 
 			assert.IsType(t, &goa_errors.Error{}, err)
@@ -314,10 +313,10 @@ func TestEdit(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.EditStub = test.editStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.EditStub = test.editStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			err := svc.Edit(context.Background(), test.user)
 
 			assert.Nil(t, err)
@@ -347,7 +346,7 @@ func TestDeleteFails(t *testing.T) {
 			status:  http.StatusBadRequest,
 		},
 		{
-			name:    "repo error on delete",
+			name:    "storage error on delete",
 			payload: &goauser.DeletePayload{Name: "Bob"},
 			deleteStub: func(context.Context, string) error {
 				return errors.New("ERROR")
@@ -360,10 +359,10 @@ func TestDeleteFails(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.DeleteStub = test.deleteStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.DeleteStub = test.deleteStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			err := svc.Delete(context.Background(), test.payload)
 
 			assert.IsType(t, &goa_errors.Error{}, err)
@@ -393,10 +392,10 @@ func TestDelete(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo := &userfakes.FakeUserRepo{}
-			repo.DeleteStub = test.deleteStub
+			storage := &userfakes.FakeUserStorage{}
+			storage.DeleteStub = test.deleteStub
 
-			svc := user.NewUser(repo)
+			svc := user.NewUser(storage)
 			err := svc.Delete(context.Background(), test.payload)
 
 			assert.Nil(t, err)

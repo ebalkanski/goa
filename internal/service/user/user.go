@@ -11,8 +11,8 @@ import (
 var UserNotFound = errors.New("user is not found")
 var UserExists = errors.New("such user already exists")
 
-//go:generate counterfeiter . UserRepo
-type UserRepo interface {
+//go:generate counterfeiter . UserStorage
+type UserStorage interface {
 	User(ctx context.Context, name string) (*goauser.User, error)
 	Users(ctx context.Context) ([]*goauser.User, error)
 	Create(ctx context.Context, u *goauser.User) error
@@ -21,19 +21,19 @@ type UserRepo interface {
 }
 
 type User struct {
-	repo UserRepo
+	storage UserStorage
 }
 
 // NewUser returns the user service implementation.
-func NewUser(repo UserRepo) goauser.Service {
+func NewUser(storage UserStorage) goauser.Service {
 	return &User{
-		repo,
+		storage,
 	}
 }
 
 // Fetch returns User info
 func (svc *User) Fetch(ctx context.Context, p *goauser.FetchPayload) (res *goauser.User, err error) {
-	user, err := svc.repo.User(ctx, p.Name)
+	user, err := svc.storage.User(ctx, p.Name)
 	if err != nil {
 		if err == UserNotFound || err == UserExists {
 			return nil, goa_errors.NewBadRequestError(err)
@@ -47,7 +47,7 @@ func (svc *User) Fetch(ctx context.Context, p *goauser.FetchPayload) (res *goaus
 
 // FetchAll returns all Users info
 func (svc *User) FetchAll(ctx context.Context) (res *goauser.Users, err error) {
-	users, err := svc.repo.Users(ctx)
+	users, err := svc.storage.Users(ctx)
 	if err != nil {
 		return nil, goa_errors.NewInternalServerError(errors.New("cannot get users"))
 	}
@@ -57,7 +57,7 @@ func (svc *User) FetchAll(ctx context.Context) (res *goauser.Users, err error) {
 
 // Create creates a new user
 func (svc *User) Create(ctx context.Context, u *goauser.User) (err error) {
-	if err := svc.repo.Create(ctx, u); err != nil {
+	if err := svc.storage.Create(ctx, u); err != nil {
 		if err == UserExists {
 			return goa_errors.NewBadRequestError(err)
 		}
@@ -69,7 +69,7 @@ func (svc *User) Create(ctx context.Context, u *goauser.User) (err error) {
 
 // Edit edits a user
 func (svc *User) Edit(ctx context.Context, u *goauser.User) (err error) {
-	if err := svc.repo.Edit(ctx, u); err != nil {
+	if err := svc.storage.Edit(ctx, u); err != nil {
 		if err == UserNotFound {
 			return goa_errors.NewBadRequestError(err)
 		}
@@ -81,7 +81,7 @@ func (svc *User) Edit(ctx context.Context, u *goauser.User) (err error) {
 
 // Delete deletes a user
 func (svc *User) Delete(ctx context.Context, p *goauser.DeletePayload) (err error) {
-	if err := svc.repo.Delete(ctx, p.Name); err != nil {
+	if err := svc.storage.Delete(ctx, p.Name); err != nil {
 		if err == UserNotFound {
 			return goa_errors.NewBadRequestError(err)
 		}

@@ -1,4 +1,4 @@
-package mongo_repo
+package storage
 
 import (
 	"context"
@@ -11,30 +11,30 @@ import (
 	"github.com/ebalkanski/goa/internal/service/user"
 )
 
-type UserRepo struct {
+type User struct {
 	logger *log.Logger
 	*mongo.Collection
 }
 
-// NewUserRepo returns new repository client
-func NewUserRepo(logger *log.Logger, collection *mongo.Collection) *UserRepo {
-	return &UserRepo{
+// NewUser returns new storage client
+func NewUser(logger *log.Logger, collection *mongo.Collection) *User {
+	return &User{
 		logger,
 		collection,
 	}
 }
 
 // User retrieves a user
-func (repo *UserRepo) User(ctx context.Context, name string) (*goauser.User, error) {
+func (storage *User) User(ctx context.Context, name string) (*goauser.User, error) {
 	filter := bson.D{{"name", name}}
 
 	var u goauser.User
-	if err := repo.FindOne(ctx, filter).Decode(&u); err != nil {
+	if err := storage.FindOne(ctx, filter).Decode(&u); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, user.UserNotFound
 		}
 
-		repo.logger.Printf("cannot get user from db: %s\n", err.Error())
+		storage.logger.Printf("cannot get user from db: %s\n", err.Error())
 		return nil, err
 	}
 
@@ -42,14 +42,14 @@ func (repo *UserRepo) User(ctx context.Context, name string) (*goauser.User, err
 }
 
 // Users retrieves all users
-func (repo *UserRepo) Users(ctx context.Context) ([]*goauser.User, error) {
+func (storage *User) Users(ctx context.Context) ([]*goauser.User, error) {
 	var usersResult []*goauser.User
 
-	cur, err := repo.Find(ctx, bson.D{{}})
+	cur, err := storage.Find(ctx, bson.D{{}})
 	defer cur.Close(ctx)
 	if err != nil {
 
-		repo.logger.Printf("cannot get users from db: %s\n", err.Error())
+		storage.logger.Printf("cannot get users from db: %s\n", err.Error())
 		return nil, err
 	}
 
@@ -57,14 +57,14 @@ func (repo *UserRepo) Users(ctx context.Context) ([]*goauser.User, error) {
 		var u goauser.User
 		err := cur.Decode(&u)
 		if err != nil {
-			repo.logger.Printf("cannot decode user: %s\n", err.Error())
+			storage.logger.Printf("cannot decode user: %s\n", err.Error())
 			continue
 		}
 		usersResult = append(usersResult, &u)
 	}
 
 	if err := cur.Err(); err != nil {
-		repo.logger.Printf("error while processing users: %s\n", err.Error())
+		storage.logger.Printf("error while processing users: %s\n", err.Error())
 		return nil, err
 	}
 
@@ -72,8 +72,8 @@ func (repo *UserRepo) Users(ctx context.Context) ([]*goauser.User, error) {
 }
 
 // Create creates a user
-func (repo *UserRepo) Create(ctx context.Context, u *goauser.User) error {
-	ok, err := repo.userExists(ctx, u)
+func (storage *User) Create(ctx context.Context, u *goauser.User) error {
+	ok, err := storage.userExists(ctx, u)
 
 	if err != nil {
 		return err
@@ -82,9 +82,9 @@ func (repo *UserRepo) Create(ctx context.Context, u *goauser.User) error {
 		return user.UserExists
 	}
 
-	_, err = repo.InsertOne(ctx, u)
+	_, err = storage.InsertOne(ctx, u)
 	if err != nil {
-		repo.logger.Printf("cannot insert user into db: %s\n", err.Error())
+		storage.logger.Printf("cannot insert user into db: %s\n", err.Error())
 		return err
 	}
 
@@ -92,13 +92,13 @@ func (repo *UserRepo) Create(ctx context.Context, u *goauser.User) error {
 }
 
 // Edit edits a user
-func (repo *UserRepo) Edit(ctx context.Context, u *goauser.User) error {
+func (storage *User) Edit(ctx context.Context, u *goauser.User) error {
 	filter := bson.D{{"name", u.Name}}
 	update := bson.D{
 		{"$set", bson.D{{"age", u.Age}}},
 	}
 
-	updateResult, err := repo.UpdateOne(ctx, filter, update)
+	updateResult, err := storage.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
@@ -110,10 +110,10 @@ func (repo *UserRepo) Edit(ctx context.Context, u *goauser.User) error {
 }
 
 // Delete deletes a user
-func (repo *UserRepo) Delete(ctx context.Context, name string) error {
+func (storage *User) Delete(ctx context.Context, name string) error {
 	filter := bson.D{{"name", name}}
 
-	deleteResult, err := repo.DeleteOne(ctx, filter)
+	deleteResult, err := storage.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
@@ -124,16 +124,16 @@ func (repo *UserRepo) Delete(ctx context.Context, name string) error {
 	return user.UserNotFound
 }
 
-func (repo *UserRepo) userExists(ctx context.Context, u *goauser.User) (bool, error) {
+func (storage *User) userExists(ctx context.Context, u *goauser.User) (bool, error) {
 	filter := bson.D{{"name", u.Name}}
 
 	var user goauser.User
-	if err := repo.FindOne(ctx, filter).Decode(&user); err != nil {
+	if err := storage.FindOne(ctx, filter).Decode(&user); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return false, nil
 		}
 
-		repo.logger.Printf("cannot get user from db: %s\n", err.Error())
+		storage.logger.Printf("cannot get user from db: %s\n", err.Error())
 		return false, err
 	}
 
