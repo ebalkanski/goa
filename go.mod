@@ -7,6 +7,8 @@ require (
 	github.com/joefitzgerald/rainbow-reporter v0.1.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.4.1 // indirect
+	github.com/onsi/ginkgo v1.16.2
+	github.com/onsi/gomega v1.12.0
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	go.mongodb.org/mongo-driver v1.4.6
