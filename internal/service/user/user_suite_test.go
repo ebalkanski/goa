@@ -1,4 +1,4 @@
-package goa_errors_test
+package user_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestGoaErrors(t *testing.T) {
+func TestUser(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Goa Custom Errors Suite")
+	RunSpecs(t, "User Service Suite")
 }

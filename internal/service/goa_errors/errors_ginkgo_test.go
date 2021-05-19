@@ -4,13 +4,13 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/ebalkanski/goa/internal/service/goa_errors"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/ebalkanski/goa/internal/service/goa_errors"
 )
 
-var _ = Describe("Errors2", func() {
+var _ = Describe("Errors", func() {
 	var (
 		err error
 	)
